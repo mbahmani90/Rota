@@ -22,8 +22,8 @@ object NetworkModule {
     // Overpass asks clients to identify themselves (fair-use policy).
     private const val USER_AGENT = "Rota (https://github.com/mbahmani90/Rota)"
 
-    // Longer than the query's [timeout:25] so Overpass can answer before OkHttp gives up.
-    private const val READ_TIMEOUT_SECONDS = 35L
+    // Longer than the query's server timeout so Overpass can answer before OkHttp gives up.
+    private const val READ_TIMEOUT_SECONDS = OverpassApi.QUERY_TIMEOUT_SECONDS + 10L
 
     @Provides
     @Singleton

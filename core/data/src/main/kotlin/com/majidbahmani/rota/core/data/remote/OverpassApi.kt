@@ -19,5 +19,8 @@ interface OverpassApi {
 
     companion object {
         const val BASE_URL = "https://overpass-api.de/api/"
+
+        /** Server-side query limit; OkHttp's read timeout must be longer (see NetworkModule). */
+        const val QUERY_TIMEOUT_SECONDS = 25
     }
 }
