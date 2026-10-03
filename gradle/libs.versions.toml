@@ -12,6 +12,7 @@ appcompat = "1.6.1"
 appProjected = "1.4.0"
 appAutomotive = "1.7.0"
 app = "1.4.0"
+kotlinxSerialization = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,10 +33,12 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 androidx-app-projected = { group = "androidx.car.app", name = "app-projected", version.ref = "appProjected" }
 androidx-app-automotive = { group = "androidx.car.app", name = "app-automotive", version.ref = "appAutomotive" }
 androidx-app = { group = "androidx.car.app", name = "app", version.ref = "app" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
