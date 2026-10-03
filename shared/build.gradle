@@ -19,9 +19,15 @@ android {
     }
 }
 dependencies {
+    implementation project(':core:domain')
+
     implementation libs.androidx.app
+    implementation libs.kotlinx.coroutines.core
 
     // Hilt
     implementation libs.hilt.android
     ksp libs.hilt.compiler
+
+    testImplementation libs.junit
+    testImplementation libs.kotlinx.coroutines.test
 }
