@@ -22,6 +22,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures {
+        buildConfig = true   // BuildConfig.DEBUG for debug-only logging
+    }
 }
 
 dependencies {
