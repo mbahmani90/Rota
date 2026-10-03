@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -34,6 +36,12 @@ android {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(project(":core:data"))
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
     implementation(libs.androidx.app.automotive)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)

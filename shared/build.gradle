@@ -1,5 +1,7 @@
 plugins {
     id 'com.android.library'
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 android {
     namespace 'com.majidbahmani.rota.shared'
@@ -18,4 +20,8 @@ android {
 }
 dependencies {
     implementation libs.androidx.app
+
+    // Hilt
+    implementation libs.hilt.android
+    ksp libs.hilt.compiler
 }
