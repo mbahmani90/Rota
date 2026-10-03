@@ -17,5 +17,9 @@ kotlin {
 }
 
 dependencies {
+    // @Inject only (JSR-330 annotations, no Android)
+    implementation(libs.javax.inject)
+
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
