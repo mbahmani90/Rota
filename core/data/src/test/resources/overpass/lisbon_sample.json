@@ -1,0 +1,221 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-10-03T14:08:21Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "node",
+      "id": 3706318964,
+      "lat": 38.7222735,
+      "lon": -9.1288602,
+      "tags": {
+        "access": "yes",
+        "addr:city": "Lisboa",
+        "addr:postcode": "1170-166",
+        "addr:street": "Avenida General Roçadas",
+        "amenity": "charging_station",
+        "authentication:app": "yes",
+        "authentication:membership_card": "yes",
+        "authentication:none": "no",
+        "brand": "Powerdot",
+        "brand:wikidata": "Q123574541",
+        "capacity": "2",
+        "email": "ajuda@powerdot.pt",
+        "fee": "yes",
+        "maxstay": "unlimited",
+        "motorcar": "yes",
+        "name": "LSB-90129",
+        "network": "Mobi.E",
+        "opening_hours": "24/7",
+        "operator": "Powerdot",
+        "operator:wikidata": "Q123574541",
+        "parking:fee": "no",
+        "payment:app": "yes",
+        "payment:cards": "no",
+        "payment:cash": "no",
+        "payment:membership_card": "yes",
+        "phone": "+351 800 180 292",
+        "ref": "LSB-90129",
+        "ref:EU:EVSE": "PT*HRZ*E*LSB*90129*01;PT*HRZ*E*LSB*90129*02",
+        "socket:type2": "2",
+        "socket:type2:current": "32",
+        "socket:type2:output": "22 kW",
+        "socket:type2:voltage": "400",
+        "website": "https://www.mobie.pt"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3724919273,
+      "lat": 38.7330817,
+      "lon": -9.1477204,
+      "tags": {
+        "access": "yes",
+        "addr:city": "Lisboa",
+        "addr:postcode": "1050-170",
+        "addr:street": "Rua Pedro Nunes",
+        "amenity": "charging_station",
+        "authentication:app": "yes",
+        "authentication:membership_card": "yes",
+        "authentication:none": "no",
+        "brand": "Powerdot",
+        "brand:wikidata": "Q123574541",
+        "capacity": "2",
+        "email": "ajuda@powerdot.pt",
+        "fee": "yes",
+        "maxstay": "unlimited",
+        "motorcar": "yes",
+        "name": "LSB-00950",
+        "network": "Mobi.E",
+        "old_ref": "LSB-90100",
+        "opening_hours": "24/7",
+        "operator": "Powerdot",
+        "operator:wikidata": "Q123574541",
+        "parking:fee": "no",
+        "payment:app": "yes",
+        "payment:cards": "no",
+        "payment:cash": "no",
+        "payment:membership_card": "yes",
+        "phone": "+351 800 180 292",
+        "ref": "LSB-00950",
+        "ref:EU:EVSE": "PT*HRZ*E*LSB*00950*01;PT*HRZ*E*LSB*00950*02",
+        "socket:type2": "2",
+        "socket:type2:current": "32",
+        "socket:type2:output": "22 kW",
+        "socket:type2:voltage": "400",
+        "website": "https://www.mobie.pt"
+      }
+    },
+    {
+      "type": "node",
+      "id": 610554965,
+      "lat": 38.7299263,
+      "lon": -9.1265482,
+      "tags": {
+        "amenity": "fuel",
+        "branch": "Penha de França",
+        "brand": "Prio",
+        "brand:wikidata": "Q62530421",
+        "compressed_air": "yes",
+        "name": "Prio"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1828521236,
+      "lat": 38.721171,
+      "lon": -9.1301245,
+      "tags": {
+        "addr:city": "Lisboa",
+        "addr:postcode": "1170-169",
+        "addr:street": "Rua da Graça",
+        "amenity": "fuel",
+        "brand": "OZ Energia",
+        "brand:wikidata": "Q118512530",
+        "brand:wikipedia": "pt:Oz Energia",
+        "compressed_air": "yes",
+        "fuel:diesel": "yes",
+        "fuel:octane_95": "yes",
+        "fuel:octane_98": "yes",
+        "mapillary": "475696760174151",
+        "name": "OZ Energia",
+        "opening_hours": "24/7",
+        "operator": "Oz Energia",
+        "phone": "+351218142019",
+        "survey:date": "2021-05-06"
+      }
+    },
+    {
+      "type": "node",
+      "id": 2448412798,
+      "lat": 38.7132913,
+      "lon": -9.1273369,
+      "tags": {
+        "access": "permissive",
+        "amenity": "parking"
+      }
+    },
+    {
+      "type": "way",
+      "id": 98824283,
+      "center": {
+        "lat": 38.7255783,
+        "lon": -9.1356884
+      },
+      "tags": {
+        "access": "customers",
+        "amenity": "parking",
+        "building:levels": "2",
+        "capacity": "125",
+        "fee": "yes",
+        "layer": "-1",
+        "operator": "Fitness Hut",
+        "operator:type": "private",
+        "parking": "underground",
+        "surface": "paved"
+      }
+    },
+    {
+      "type": "way",
+      "id": 168879905,
+      "center": {
+        "lat": 38.7283928,
+        "lon": -9.1499625
+      },
+      "tags": {
+        "access": "private",
+        "addr:street": "Avenida Sidónio Pais",
+        "amenity": "parking",
+        "fee": "yes",
+        "operator": "EMEL",
+        "operator:wikidata": "Q30256831",
+        "parking": "street_side",
+        "private": "residents"
+      }
+    },
+    {
+      "type": "relation",
+      "id": 16862461,
+      "center": {
+        "lat": 38.7324001,
+        "lon": -9.1468752
+      },
+      "tags": {
+        "access": "yes",
+        "addr:city": "Lisboa",
+        "addr:postcode": "1050-135",
+        "addr:street": "Rua Latino Coelho",
+        "amenity": "parking",
+        "brand": "Telpark",
+        "capacity": "495",
+        "capacity:disabled": "3",
+        "contact:facebook": "telpark.es",
+        "contact:instagram": "telpark_app",
+        "contact:linkedin": "https://www.linkedin.com/company/empark-aparcamientos-y-servicios-s-a",
+        "contact:phone": "+351 211 972 657;+351 915 091 372",
+        "contact:twitter": "telpark_es",
+        "contact:youtube": "https://www.youtube.com/@telpark_oficial",
+        "fee": "yes",
+        "name": "Saldanha",
+        "opening_hours": "24/7",
+        "operator": "Empark",
+        "parking": "underground",
+        "payment:app": "yes",
+        "payment:cash": "yes",
+        "payment:credit_cards": "yes",
+        "payment:via_verde": "yes",
+        "ref": "26425",
+        "site": "parking",
+        "source:addr": "website",
+        "source:capacity": "website",
+        "source:contact": "website",
+        "source:opening_hours": "website",
+        "type": "site",
+        "website": "https://www.telpark.com/pt/cidades/lisboa/parque-saldanha/"
+      }
+    }
+  ]
+}

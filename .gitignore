@@ -1,0 +1,24 @@
+# Gradle
+.gradle/
+/build
+.externalNativeBuild
+.cxx
+
+# Kotlin
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+
+# Local config
+local.properties
+
+# Android
+/captures
+
+# OS
+.DS_Store
+
+# Personal notes / playbook
+/doc/
