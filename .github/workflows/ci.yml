@@ -11,14 +11,44 @@ concurrency:
   cancel-in-progress: true
 
 # Read-only token: the workflow only builds and tests.
+# pull-requests: read lets the Changes job list a PR's changed files.
 permissions:
   contents: read
+  pull-requests: read
 
-# "Build" first; when it succeeds, "Unit tests", "Android Lint" and "Code style" run in parallel.
+# "Changes" decides whether code changed; docs-only changes (Markdown, docs/) skip the rest.
+# Then "Build"; when it succeeds, "Unit tests", "Android Lint" and "Code style" run in parallel.
 # Each job runs on its own fresh machine, so each checks out and sets up JDK and Gradle.
+# "CI result" is the single check to require in branch protection.
 jobs:
+  changes:
+    name: Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+
+    steps:
+      # Needed on pushes to main: changes are compared with git against the previous commit.
+      - name: Check out
+        uses: actions/checkout@v7
+
+      # "code" is true if any changed file is something other than Markdown or docs/.
+      - name: Detect code changes
+        id: filter
+        uses: dorny/paths-filter@v4
+        with:
+          predicate-quantifier: some-with-excludes
+          filters: |
+            code:
+              - '**'
+              - '!**/*.md'
+              - '!docs/**'
+
   build:
     name: Build
+    needs: changes
+    if: ${{ needs.changes.outputs.code == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -138,3 +168,25 @@ jobs:
       # ktlint (+ Compose rules) via Spotless; fix locally with ./gradlew spotlessApply
       - name: Code style
         run: ./gradlew spotlessCheck
+
+  # One result for branch protection. Skipped jobs (docs-only change) count as success;
+  # a failed or cancelled job fails this check.
+  ci-result:
+    name: CI result
+    needs: [changes, build, unit-tests, lint, code-style]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check job results
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Job results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "A required job did not succeed."
+              exit 1
+            fi
+          done
