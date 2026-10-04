@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to the same PR or branch cancels the run still in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only token: the workflow only builds and tests.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build, test and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      # The Gradle daemon asks for JDK 25 (gradle/gradle-daemon-jvm.properties);
+      # installing it here avoids a download on every run.
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+
+      # Caches dependencies and build outputs; also validates the Gradle wrapper.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # No MAPS_API_KEY in CI: the app builds with Overpass, and unit tests use fakes.
+      - name: Build debug APKs
+        run: ./gradlew assembleDebug
+
+      - name: Unit tests
+        run: ./gradlew :core:domain:test testDebugUnitTest
+
+      - name: Android Lint
+        run: ./gradlew lintDebug
+
+      - name: Upload test and lint reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+            **/build/reports/lint-results-*.html
+          retention-days: 7
+
+      - name: Upload debug APKs
+        uses: actions/upload-artifact@v7
+        with:
+          name: debug-apks
+          path: |
+            automotive/build/outputs/apk/debug/*.apk
+            mobile/build/outputs/apk/debug/*.apk
+          retention-days: 7
