@@ -52,13 +52,16 @@ private fun OverpassElementDto.toDetails(): PoiDetails? = when (tags["amenity"])
         connectors = toConnectors(),
         network = tags["network"],
     )
+
     "fuel" -> PoiDetails.Fuel(
         fuelTypes = FUEL_TAGS.filterKeys { tags[it] == "yes" }.values.toSet(),
     )
+
     "parking" -> PoiDetails.Parking(
         type = tags["parking"]?.toParkingType(),
         capacity = tags["capacity"]?.toIntOrNull(),
     )
+
     else -> null
 }
 
@@ -86,11 +89,10 @@ private fun String.toConnectorType(): ConnectorType = when {
 }
 
 /** "22 kW" → 22.0, "7400 W" → 7.4, "11 kW;22 kW" → 22.0. A value without a unit is read as kW. */
-internal fun String.toMaxPowerKw(): Double? =
-    POWER_REGEX.findAll(this).mapNotNull { match ->
-        val number = match.groupValues[1].replace(',', '.').toDoubleOrNull() ?: return@mapNotNull null
-        if (match.groupValues[2].equals("W", ignoreCase = true)) number / 1000 else number
-    }.maxOrNull()
+internal fun String.toMaxPowerKw(): Double? = POWER_REGEX.findAll(this).mapNotNull { match ->
+    val number = match.groupValues[1].replace(',', '.').toDoubleOrNull() ?: return@mapNotNull null
+    if (match.groupValues[2].equals("W", ignoreCase = true)) number / 1000 else number
+}.maxOrNull()
 
 private fun String.toParkingType(): ParkingType = when (this) {
     "surface" -> ParkingType.SURFACE

@@ -13,9 +13,7 @@ interface OverpassApi {
      */
     @FormUrlEncoded
     @POST("interpreter")
-    suspend fun interpreter(
-        @Field("data") query: String,
-    ): OverpassResponseDto
+    suspend fun interpreter(@Field("data") query: String): OverpassResponseDto
 
     companion object {
         const val BASE_URL = "https://overpass-api.de/api/"

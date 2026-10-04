@@ -129,7 +129,7 @@ class OverpassMapperTest {
                 "socket:chademo" to "yes",
                 "socket:schuko" to "no",
                 "socket:tesla_supercharger" to "1",
-            )
+            ),
         ).toDomain()?.details as PoiDetails.Charging
 
         assertEquals(

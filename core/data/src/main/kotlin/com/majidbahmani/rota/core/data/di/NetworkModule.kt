@@ -12,14 +12,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -56,7 +56,7 @@ object NetworkModule {
                 } else {
                     HttpLoggingInterceptor.Level.NONE
                 }
-            }
+            },
         )
         .build()
 
@@ -71,8 +71,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOverpassApi(@OverpassRetrofit retrofit: Retrofit): OverpassApi =
-        retrofit.create(OverpassApi::class.java)
+    fun provideOverpassApi(@OverpassRetrofit retrofit: Retrofit): OverpassApi = retrofit.create(OverpassApi::class.java)
 
     @Provides
     @Singleton
@@ -95,7 +94,7 @@ object NetworkModule {
                     apiKey = config.apiKey,
                     packageName = context.packageName,
                     certificateSha1 = { context.signingCertificateSha1() },
-                )
+                ),
             )
             .build()
         return Retrofit.Builder()

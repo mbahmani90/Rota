@@ -17,8 +17,7 @@ class RotaCarAppService : CarAppService() {
     @Inject
     lateinit var getNearbyPois: GetNearbyPoisUseCase
 
-    override fun createHostValidator(): HostValidator =
-        HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
+    override fun createHostValidator(): HostValidator = HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
 
     override fun onCreateSession(): Session = RotaSession(getNearbyPois)
 }

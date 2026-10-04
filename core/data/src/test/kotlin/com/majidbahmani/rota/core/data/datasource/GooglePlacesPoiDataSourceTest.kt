@@ -28,7 +28,7 @@ class GooglePlacesPoiDataSourceTest {
                     location = LatLngDto(38.72, -9.13),
                     primaryType = "gas_station",
                 ),
-            )
+            ),
         )
 
         val pois = dataSource.getNearbyPois(lisbon, 5_000, setOf(PoiCategory.FUEL))

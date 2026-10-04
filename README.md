@@ -139,6 +139,7 @@ PoiRepositoryImpl                 routes by source; the only place exceptions be
 | AAOS UI | Jetpack Compose (Material 3), Lifecycle 2.11, Hilt ViewModel Compose, **MapLibre Android 13.6.1** |
 | Android Auto UI | Car App Library 1.7.0 |
 | Tests | JUnit 4, kotlinx-coroutines-test, hand-written fakes |
+| Code style / CI | ktlint 1.8 + Compose rules via Spotless; GitHub Actions |
 | Min / target SDK | 29 / 37 |
 
 ## Getting started
@@ -174,7 +175,7 @@ The key goes `local.properties` → `BuildConfig` → an OkHttp interceptor that
 
 ## Testing
 
-**95 JVM unit tests**, no emulator needed; [CI](.github/workflows/ci.yml) runs them on every pull request and push to `main`, together with the build and Android Lint:
+**95 JVM unit tests**, no emulator needed; [CI](.github/workflows/ci.yml) runs them on every pull request and push to `main`:
 
 ```bash
 ./gradlew :core:domain:test :core:data:testDebugUnitTest :shared:testDebugUnitTest :automotive:testDebugUnitTest
@@ -186,6 +187,22 @@ The key goes `local.properties` → `BuildConfig` → an OkHttp interceptor that
 | `core:data` | 53 | DTO decoding (Overpass sample from Lisbon), mappers, query building, data sources, repository routing and errors, Google headers interceptor, DataStore (real file in a temp folder) |
 | `shared` | 9 | Android Auto presenter: states, retry, cancellation of outdated searches |
 | `automotive` | 17 | ViewModels: categories, data source changes, selection, panel, dialog |
+
+**CI pipeline** (GitHub Actions):
+
+```
+[ Build ] ──┬──► [ Unit tests ]
+            ├──► [ Android Lint ]
+            └──► [ Code style ]
+```
+
+- **Build**: debug APKs of both apps (downloadable from the run).
+- **Unit tests**, **Android Lint** and **Code style** run in parallel once the build is green; each uploads its reports.
+- **Code style**: ktlint (Android Studio style, 120 columns, Compose rules) through Spotless:
+  ```bash
+  ./gradlew spotlessCheck    # what CI runs
+  ./gradlew spotlessApply    # fixes most violations
+  ```
 
 - **Fakes over mocks**: domain interfaces make hand-written fakes easy; repository fakes can suspend until the test answers, to test cancellation and ordering.
 - **Coroutines**: `runTest`, `runCurrent()`, a `MainDispatcherRule` for `viewModelScope`, collectors in `backgroundScope` for lazy `StateFlow`s.

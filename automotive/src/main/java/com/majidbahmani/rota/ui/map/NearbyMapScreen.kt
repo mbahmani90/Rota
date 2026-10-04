@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -49,20 +49,17 @@ import com.majidbahmani.rota.viewmodel.NearbyMapUiState.ErrorReason
 import com.majidbahmani.rota.viewmodel.NearbyMapViewModel
 
 @Composable
-fun NearbyMapRoute(
-    modifier: Modifier = Modifier,
-    viewModel: NearbyMapViewModel = hiltViewModel(),
-) {
+fun NearbyMapRoute(modifier: Modifier = Modifier, viewModel: NearbyMapViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     NearbyMapScreen(
         uiState = uiState,
-        onCategorySelected = viewModel::onCategorySelected,
+        onCategorySelect = viewModel::onCategorySelected,
         onRetry = viewModel::retry,
-        onPlaceSelected = viewModel::onPlaceSelected,
+        onPlaceSelect = viewModel::onPlaceSelected,
         onChangeDataSource = viewModel::onChangeDataSource,
         onTogglePanel = viewModel::onTogglePanel,
-        onPanelAnimationFinished = viewModel::onPanelAnimationFinished,
+        onPanelAnimationFinish = viewModel::onPanelAnimationFinished,
         modifier = modifier,
     )
     if (uiState.showDataSourceDialog) {
@@ -73,12 +70,12 @@ fun NearbyMapRoute(
 @Composable
 fun NearbyMapScreen(
     uiState: NearbyMapUiState,
-    onCategorySelected: (PoiCategory) -> Unit,
+    onCategorySelect: (PoiCategory) -> Unit,
     onRetry: () -> Unit,
-    onPlaceSelected: (String) -> Unit,
+    onPlaceSelect: (String) -> Unit,
     onChangeDataSource: () -> Unit,
     onTogglePanel: () -> Unit,
-    onPanelAnimationFinished: () -> Unit,
+    onPanelAnimationFinish: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val mapController = rememberPlacesMapController()
@@ -87,17 +84,17 @@ fun NearbyMapScreen(
         targetValue = if (uiState.panelExpanded) PANEL_WIDTH else 0.dp,
         label = "panelWidth",
         // The map has its new size only once the animation ends.
-        finishedListener = { onPanelAnimationFinished() },
+        finishedListener = { onPanelAnimationFinish() },
     )
 
     Row(modifier = modifier.fillMaxSize()) {
         PlacesPanel(
             uiState = uiState,
             selectedPlaceId = uiState.selectedPlaceId,
-            onCategorySelected = onCategorySelected,
+            onCategorySelect = onCategorySelect,
             onRetry = onRetry,
             onChangeDataSource = onChangeDataSource,
-            onPlaceClick = { onPlaceSelected(it.poi.id) },
+            onPlaceClick = { onPlaceSelect(it.poi.id) },
             // Fixed inner width, clipped by the animated outer width: content doesn't reflow while folding.
             modifier = Modifier.width(panelWidth).fillMaxHeight(),
         )
@@ -108,7 +105,7 @@ fun NearbyMapScreen(
                 places = uiState.places,
                 placeNames = placeNames,
                 selectedPlaceId = uiState.selectedPlaceId,
-                onPlaceClick = onPlaceSelected,
+                onPlaceClick = onPlaceSelect,
                 layoutVersion = uiState.mapLayoutVersion,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -141,7 +138,7 @@ private fun PanelToggleButton(expanded: Boolean, onClick: () -> Unit, modifier: 
 private fun PlacesPanel(
     uiState: NearbyMapUiState,
     selectedPlaceId: String?,
-    onCategorySelected: (PoiCategory) -> Unit,
+    onCategorySelect: (PoiCategory) -> Unit,
     onRetry: () -> Unit,
     onChangeDataSource: () -> Unit,
     onPlaceClick: (NearbyPoi) -> Unit,
@@ -157,7 +154,7 @@ private fun PlacesPanel(
                 PoiCategory.entries.forEach { category ->
                     FilterChip(
                         selected = category == uiState.category,
-                        onClick = { onCategorySelected(category) },
+                        onClick = { onCategorySelect(category) },
                         label = { Text(category.title()) },
                     )
                 }
@@ -167,11 +164,14 @@ private fun PlacesPanel(
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     uiState.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+
                     uiState.error != null -> ErrorContent(uiState.error, onRetry, Modifier.align(Alignment.Center))
+
                     uiState.places.isEmpty() -> Text(
                         text = stringResource(R.string.nearby_empty),
                         modifier = Modifier.align(Alignment.Center),
                     )
+
                     else -> PlaceList(uiState.places, selectedPlaceId, onPlaceClick)
                 }
             }
@@ -200,11 +200,7 @@ private fun DataSourceRow(uiState: NearbyMapUiState, onChangeDataSource: () -> U
 }
 
 @Composable
-private fun PlaceList(
-    places: List<NearbyPoi>,
-    selectedPlaceId: String?,
-    onPlaceClick: (NearbyPoi) -> Unit,
-) {
+private fun PlaceList(places: List<NearbyPoi>, selectedPlaceId: String?, onPlaceClick: (NearbyPoi) -> Unit) {
     val listState = rememberLazyListState()
     // A place tapped on the map scrolls into view in the list.
     LaunchedEffect(selectedPlaceId) {
@@ -214,11 +210,12 @@ private fun PlaceList(
 
     LazyColumn(state = listState) {
         items(items = places, key = { it.poi.id }) { place ->
-            val selected = place.poi.id == selectedPlaceId
+            val colors = MaterialTheme.colorScheme
+            val background = if (place.poi.id == selectedPlaceId) colors.secondaryContainer else colors.surface
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
+                    .background(background)
                     .clickable { onPlaceClick(place) }
                     // Large touch targets for use in a car.
                     .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -271,8 +268,8 @@ private fun ErrorContent(reason: ErrorReason, onRetry: () -> Unit, modifier: Mod
                 when (reason) {
                     ErrorReason.NO_CONNECTION -> R.string.error_no_connection
                     ErrorReason.SERVICE -> R.string.error_service
-                }
-            )
+                },
+            ),
         )
         Button(onClick = onRetry, modifier = Modifier.padding(top = 12.dp)) {
             Text(stringResource(R.string.action_retry))

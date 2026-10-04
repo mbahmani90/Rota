@@ -15,7 +15,7 @@ fun PoiCategory.title(context: Context): String = context.getString(
         PoiCategory.EV_CHARGER -> R.string.category_ev_charger
         PoiCategory.FUEL -> R.string.category_fuel
         PoiCategory.PARKING -> R.string.category_parking
-    }
+    },
 )
 
 /** The POI's name, or its category when the source has none. */
@@ -24,7 +24,7 @@ fun Poi.displayName(context: Context): String = name ?: context.getString(
         PoiCategory.EV_CHARGER -> R.string.category_ev_charger_single
         PoiCategory.FUEL -> R.string.category_fuel_single
         PoiCategory.PARKING -> R.string.category_parking_single
-    }
+    },
 )
 
 /**
@@ -37,10 +37,9 @@ fun distanceText(distanceMeters: Double, suffix: String? = null): CharSequence {
     return text
 }
 
-private fun distance(meters: Double): Distance =
-    if (meters < 1_000) {
-        // Nearest 10 m: finer would suggest more precision than GPS has.
-        Distance.create((meters / 10).roundToInt() * 10.0, Distance.UNIT_METERS)
-    } else {
-        Distance.create(meters / 1_000, Distance.UNIT_KILOMETERS_P1)
-    }
+private fun distance(meters: Double): Distance = if (meters < 1_000) {
+    // Nearest 10 m: finer would suggest more precision than GPS has.
+    Distance.create((meters / 10).roundToInt() * 10.0, Distance.UNIT_METERS)
+} else {
+    Distance.create(meters / 1_000, Distance.UNIT_KILOMETERS_P1)
+}

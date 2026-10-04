@@ -8,6 +8,8 @@ import com.majidbahmani.rota.core.domain.usecase.GetNearbyPoisUseCase
 import com.majidbahmani.rota.core.domain.usecase.ObservePoiDataSourceUseCase
 import com.majidbahmani.rota.viewmodel.NearbyMapUiState.ErrorReason
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.IOException
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,8 +22,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import java.io.IOException
-import javax.inject.Inject
 
 @HiltViewModel
 class NearbyMapViewModel @Inject constructor(
@@ -61,7 +61,7 @@ class NearbyMapViewModel @Inject constructor(
                     getNearbyPois(center, SearchConfig.radiusMeters(category), setOf(category)).fold(
                         onSuccess = { state.copy(places = it) },
                         onFailure = { state.copy(error = it.toErrorReason()) },
-                    )
+                    ),
                 )
             }
         }

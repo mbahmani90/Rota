@@ -14,11 +14,7 @@ class OverpassPoiDataSource @Inject constructor(
     private val api: OverpassApi,
 ) : PoiRemoteDataSource {
 
-    override suspend fun getNearbyPois(
-        center: GeoPoint,
-        radiusMeters: Int,
-        categories: Set<PoiCategory>,
-    ): List<Poi> {
+    override suspend fun getNearbyPois(center: GeoPoint, radiusMeters: Int, categories: Set<PoiCategory>): List<Poi> {
         val response = api.interpreter(buildQuery(center, radiusMeters, categories))
         // Overpass can answer 200 with the error only in `remark`.
         response.remark?.let { throw OverpassServerException(it) }
@@ -43,11 +39,14 @@ class OverpassPoiDataSource @Inject constructor(
 
     private fun PoiCategory.tagFilter(): String = when (this) {
         PoiCategory.EV_CHARGER -> """["amenity"="charging_station"]"""
+
         PoiCategory.FUEL -> """["amenity"="fuel"]"""
+
         // Skip on-street spaces, private garages and private or residents-only parking.
         // `!~` also keeps elements that don't have the tag.
-        PoiCategory.PARKING -> """["amenity"="parking"]""" +
-            """["parking"!~"^(street_side|lane|on_kerb|half_on_kerb|layby|garage_boxes|sheds)$"]""" +
-            """["access"!~"^(private|no|permit)$"]"""
+        PoiCategory.PARKING ->
+            """["amenity"="parking"]""" +
+                """["parking"!~"^(street_side|lane|on_kerb|half_on_kerb|layby|garage_boxes|sheds)$"]""" +
+                """["access"!~"^(private|no|permit)$"]"""
     }
 }

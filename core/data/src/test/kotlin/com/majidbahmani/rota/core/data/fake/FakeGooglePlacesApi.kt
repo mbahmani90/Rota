@@ -13,10 +13,7 @@ class FakeGooglePlacesApi(
     val requests = mutableListOf<SearchNearbyRequestDto>()
     val fieldMasks = mutableListOf<String>()
 
-    override suspend fun searchNearby(
-        request: SearchNearbyRequestDto,
-        fieldMask: String,
-    ): SearchNearbyResponseDto {
+    override suspend fun searchNearby(request: SearchNearbyRequestDto, fieldMask: String): SearchNearbyResponseDto {
         requests += request
         fieldMasks += fieldMask
         error?.let { throw it }

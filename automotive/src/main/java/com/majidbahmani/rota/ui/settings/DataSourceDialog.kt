@@ -26,25 +26,18 @@ import com.majidbahmani.rota.viewmodel.SettingsUiState
 import com.majidbahmani.rota.viewmodel.SettingsViewModel
 
 @Composable
-fun DataSourceDialogRoute(
-    onDismiss: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel(),
-) {
+fun DataSourceDialogRoute(onDismiss: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     DataSourceDialog(
         uiState = uiState,
-        onDataSourceSelected = viewModel::onDataSourceSelected,
+        onDataSourceSelect = viewModel::onDataSourceSelected,
         onDismiss = onDismiss,
     )
 }
 
 @Composable
-fun DataSourceDialog(
-    uiState: SettingsUiState,
-    onDataSourceSelected: (PoiDataSource) -> Unit,
-    onDismiss: () -> Unit,
-) {
+fun DataSourceDialog(uiState: SettingsUiState, onDataSourceSelect: (PoiDataSource) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.settings_data_source)) },
@@ -59,7 +52,7 @@ fun DataSourceDialog(
                                 selected = source == uiState.selected,
                                 enabled = enabled,
                                 role = Role.RadioButton,
-                                onClick = { onDataSourceSelected(source) },
+                                onClick = { onDataSourceSelect(source) },
                             )
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -69,7 +62,13 @@ fun DataSourceDialog(
                         Column(Modifier.padding(start = 16.dp)) {
                             Text(source.title(), style = MaterialTheme.typography.titleMedium)
                             Text(
-                                text = if (enabled) source.description() else stringResource(R.string.data_source_needs_key),
+                                text = if (enabled) {
+                                    source.description()
+                                } else {
+                                    stringResource(
+                                        R.string.data_source_needs_key,
+                                    )
+                                },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -89,7 +88,7 @@ fun PoiDataSource.title(): String = stringResource(
     when (this) {
         PoiDataSource.OVERPASS -> R.string.data_source_overpass
         PoiDataSource.GOOGLE_PLACES -> R.string.data_source_google_places
-    }
+    },
 )
 
 @Composable
@@ -97,5 +96,5 @@ private fun PoiDataSource.description(): String = stringResource(
     when (this) {
         PoiDataSource.OVERPASS -> R.string.data_source_overpass_description
         PoiDataSource.GOOGLE_PLACES -> R.string.data_source_google_places_description
-    }
+    },
 )

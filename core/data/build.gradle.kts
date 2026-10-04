@@ -37,7 +37,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
-        buildConfig = true   // BuildConfig.DEBUG and BuildConfig.MAPS_API_KEY
+        buildConfig = true // BuildConfig.DEBUG and BuildConfig.MAPS_API_KEY
     }
 }
 

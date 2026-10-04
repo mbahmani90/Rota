@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.majidbahmani.rota.core.data.remote.google.GooglePlacesConfig
 import com.majidbahmani.rota.core.domain.model.PoiDataSource
+import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -13,7 +14,6 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.io.File
 
 /** Runs against a real DataStore file in a temporary folder. */
 class DataStoreSettingsRepositoryTest {

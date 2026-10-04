@@ -14,11 +14,7 @@ class FakePoiRemoteDataSource(
     var calls = 0
         private set
 
-    override suspend fun getNearbyPois(
-        center: GeoPoint,
-        radiusMeters: Int,
-        categories: Set<PoiCategory>,
-    ): List<Poi> {
+    override suspend fun getNearbyPois(center: GeoPoint, radiusMeters: Int, categories: Set<PoiCategory>): List<Poi> {
         calls++
         error?.let { throw it }
         return pois

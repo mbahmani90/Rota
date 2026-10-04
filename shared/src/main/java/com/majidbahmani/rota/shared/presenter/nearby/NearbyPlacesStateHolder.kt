@@ -4,6 +4,7 @@ import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import com.majidbahmani.rota.core.domain.usecase.GetNearbyPoisUseCase
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesUiState.ErrorReason
+import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import java.io.IOException
 
 /**
  * Car Screens aren't ViewModelStoreOwners, so this takes the ViewModel's role: it owns the
@@ -41,7 +41,7 @@ class NearbyPlacesStateHolder(
                     getNearbyPois(center, radiusMeters, setOf(category)).fold(
                         onSuccess = { NearbyPlacesUiState.Success(it) },
                         onFailure = { NearbyPlacesUiState.Error(it.toErrorReason()) },
-                    )
+                    ),
                 )
             }
         }
