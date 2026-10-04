@@ -1,4 +1,4 @@
-package com.majidbahmani.rota.shared
+package com.majidbahmani.rota.core.domain.config
 
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.PoiCategory

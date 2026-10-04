@@ -22,7 +22,7 @@ import com.majidbahmani.rota.core.domain.model.NearbyPoi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import com.majidbahmani.rota.core.domain.usecase.GetNearbyPoisUseCase
 import com.majidbahmani.rota.shared.R
-import com.majidbahmani.rota.shared.SearchConfig
+import com.majidbahmani.rota.core.domain.config.SearchConfig
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesStateHolder
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesUiState
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesUiState.ErrorReason
