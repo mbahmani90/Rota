@@ -3,23 +3,30 @@ package com.majidbahmani.rota.fake
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
+import com.majidbahmani.rota.core.domain.model.PoiDataSource
 import com.majidbahmani.rota.core.domain.repository.PoiRepository
 import kotlinx.coroutines.CompletableDeferred
 
 /** Each request suspends until the test completes its answer, so tests control the timing. */
 class FakePoiRepository : PoiRepository {
 
-    data class Request(val center: GeoPoint, val radiusMeters: Int, val categories: Set<PoiCategory>)
+    data class Request(
+        val center: GeoPoint,
+        val radiusMeters: Int,
+        val categories: Set<PoiCategory>,
+        val source: PoiDataSource = PoiDataSource.OVERPASS,
+    )
 
     val requests = mutableListOf<Request>()
     private val answers = mutableListOf<CompletableDeferred<Result<List<Poi>>>>()
 
     override suspend fun getNearbyPois(
+        source: PoiDataSource,
         center: GeoPoint,
         radiusMeters: Int,
         categories: Set<PoiCategory>,
     ): Result<List<Poi>> {
-        requests += Request(center, radiusMeters, categories)
+        requests += Request(center, radiusMeters, categories, source)
         val answer = CompletableDeferred<Result<List<Poi>>>()
         answers += answer
         return answer.await()

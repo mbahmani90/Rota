@@ -1,9 +1,11 @@
 package com.majidbahmani.rota.core.domain.usecase
 
 import com.majidbahmani.rota.core.domain.fake.FakePoiRepository
+import com.majidbahmani.rota.core.domain.fake.FakeSettingsRepository
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
+import com.majidbahmani.rota.core.domain.model.PoiDataSource
 import com.majidbahmani.rota.core.domain.model.PoiDetails
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -15,7 +17,8 @@ import java.io.IOException
 class GetNearbyPoisUseCaseTest {
 
     private val repository = FakePoiRepository()
-    private val getNearbyPois = GetNearbyPoisUseCase(repository)
+    private val settings = FakeSettingsRepository(saved = PoiDataSource.OVERPASS)
+    private val getNearbyPois = GetNearbyPoisUseCase(repository, ObservePoiDataSourceUseCase(settings))
     private val center = GeoPoint(38.7223, -9.1393)
 
     private fun fuel(id: String, latitude: Double) = Poi(
@@ -66,5 +69,14 @@ class GetNearbyPoisUseCaseTest {
         val result = getNearbyPois(center, radiusMeters = 1000, categories = setOf(PoiCategory.FUEL))
 
         assertTrue(result.getOrThrow().isEmpty())
+    }
+
+    @Test
+    fun `searches the data source chosen in the settings`() = runTest {
+        settings.setPoiDataSource(PoiDataSource.GOOGLE_PLACES)
+
+        getNearbyPois(center, radiusMeters = 1000, categories = setOf(PoiCategory.FUEL))
+
+        assertEquals(PoiDataSource.GOOGLE_PLACES, repository.requests.single().source)
     }
 }

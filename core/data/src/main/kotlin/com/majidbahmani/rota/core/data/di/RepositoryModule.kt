@@ -1,7 +1,9 @@
 package com.majidbahmani.rota.core.data.di
 
+import com.majidbahmani.rota.core.data.local.DataStoreSettingsRepository
 import com.majidbahmani.rota.core.data.repository.PoiRepositoryImpl
 import com.majidbahmani.rota.core.domain.repository.PoiRepository
+import com.majidbahmani.rota.core.domain.repository.SettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,4 +17,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindPoiRepository(impl: PoiRepositoryImpl): PoiRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(impl: DataStoreSettingsRepository): SettingsRepository
 }

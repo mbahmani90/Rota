@@ -4,8 +4,11 @@ import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import com.majidbahmani.rota.core.domain.model.PoiDetails
+import com.majidbahmani.rota.core.domain.model.PoiDataSource
 import com.majidbahmani.rota.core.domain.usecase.GetNearbyPoisUseCase
+import com.majidbahmani.rota.core.domain.usecase.ObservePoiDataSourceUseCase
 import com.majidbahmani.rota.shared.fake.FakePoiRepository
+import com.majidbahmani.rota.shared.fake.FakeSettingsRepository
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesUiState.ErrorReason
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +31,10 @@ class NearbyPlacesStateHolderTest {
     private val center = GeoPoint(38.7223, -9.1393)
 
     private fun TestScope.stateHolder(scope: CoroutineScope = backgroundScope) = NearbyPlacesStateHolder(
-        getNearbyPois = GetNearbyPoisUseCase(repository),
+        getNearbyPois = GetNearbyPoisUseCase(
+            repository,
+            ObservePoiDataSourceUseCase(FakeSettingsRepository(saved = PoiDataSource.OVERPASS)),
+        ),
         scope = scope,
         center = center,
         category = PoiCategory.FUEL,

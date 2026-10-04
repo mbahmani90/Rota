@@ -19,6 +19,8 @@ kotlin {
 dependencies {
     // @Inject only (JSR-330 annotations, no Android)
     implementation(libs.javax.inject)
+    // Flow in public interfaces, so consumers get it too; pure Kotlin, no Android
+    api(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

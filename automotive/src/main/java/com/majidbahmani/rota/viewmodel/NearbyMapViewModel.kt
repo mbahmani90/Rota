@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.majidbahmani.rota.core.domain.config.SearchConfig
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import com.majidbahmani.rota.core.domain.usecase.GetNearbyPoisUseCase
+import com.majidbahmani.rota.core.domain.usecase.ObservePoiDataSourceUseCase
 import com.majidbahmani.rota.viewmodel.NearbyMapUiState.ErrorReason
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,6 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NearbyMapViewModel @Inject constructor(
     private val getNearbyPois: GetNearbyPoisUseCase,
+    observePoiDataSource: ObservePoiDataSourceUseCase,
 ) : ViewModel() {
 
     private val center = SearchConfig.DEFAULT_CENTER
@@ -34,16 +36,19 @@ class NearbyMapViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<NearbyMapUiState> = combine(
         selectedCategory,
+        // A different source in the settings searches again.
+        observePoiDataSource(),
         retryTrigger.onStart { emit(Unit) },
-    ) { category, _ -> category }
-        // A new category or retry cancels the search still running.
-        .flatMapLatest { category ->
+    ) { category, dataSource, _ -> category to dataSource }
+        // A new category, source or retry cancels the search still running.
+        .flatMapLatest { (category, dataSource) ->
             flow {
-                emit(NearbyMapUiState(category, center, isLoading = true))
+                val state = NearbyMapUiState(category, center, dataSource)
+                emit(state.copy(isLoading = true))
                 emit(
                     getNearbyPois(center, SearchConfig.radiusMeters(category), setOf(category)).fold(
-                        onSuccess = { NearbyMapUiState(category, center, places = it) },
-                        onFailure = { NearbyMapUiState(category, center, error = it.toErrorReason()) },
+                        onSuccess = { state.copy(places = it) },
+                        onFailure = { state.copy(error = it.toErrorReason()) },
                     )
                 )
             }

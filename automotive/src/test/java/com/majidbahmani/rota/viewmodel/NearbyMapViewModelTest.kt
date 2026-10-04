@@ -4,9 +4,12 @@ import com.majidbahmani.rota.core.domain.config.SearchConfig
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
+import com.majidbahmani.rota.core.domain.model.PoiDataSource
 import com.majidbahmani.rota.core.domain.model.PoiDetails
 import com.majidbahmani.rota.core.domain.usecase.GetNearbyPoisUseCase
+import com.majidbahmani.rota.core.domain.usecase.ObservePoiDataSourceUseCase
 import com.majidbahmani.rota.fake.FakePoiRepository
+import com.majidbahmani.rota.fake.FakeSettingsRepository
 import com.majidbahmani.rota.util.MainDispatcherRule
 import com.majidbahmani.rota.viewmodel.NearbyMapUiState.ErrorReason
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,11 +31,13 @@ class NearbyMapViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = FakePoiRepository()
+    private val settings = FakeSettingsRepository(saved = PoiDataSource.OVERPASS)
     private val center = SearchConfig.DEFAULT_CENTER
 
     /** The state is lazy: like the screen, a test must collect it to start loading. */
     private fun TestScope.collectedViewModel(): NearbyMapViewModel {
-        val viewModel = NearbyMapViewModel(GetNearbyPoisUseCase(repository))
+        val observePoiDataSource = ObservePoiDataSourceUseCase(settings)
+        val viewModel = NearbyMapViewModel(GetNearbyPoisUseCase(repository, observePoiDataSource), observePoiDataSource)
         backgroundScope.launch { viewModel.uiState.collect {} }
         runCurrent()
         return viewModel
@@ -53,7 +58,10 @@ class NearbyMapViewModelTest {
     fun `starts with EV chargers loading`() = runTest {
         val viewModel = collectedViewModel()
 
-        assertEquals(NearbyMapUiState(PoiCategory.EV_CHARGER, center, isLoading = true), viewModel.uiState.value)
+        assertEquals(
+            NearbyMapUiState(PoiCategory.EV_CHARGER, center, PoiDataSource.OVERPASS, isLoading = true),
+            viewModel.uiState.value,
+        )
         assertEquals(
             listOf(FakePoiRepository.Request(center, SearchConfig.radiusMeters(PoiCategory.EV_CHARGER), setOf(PoiCategory.EV_CHARGER))),
             repository.requests,
@@ -81,7 +89,10 @@ class NearbyMapViewModelTest {
         viewModel.onCategorySelected(PoiCategory.FUEL)
         runCurrent()
 
-        assertEquals(NearbyMapUiState(PoiCategory.FUEL, center, isLoading = true), viewModel.uiState.value)
+        assertEquals(
+            NearbyMapUiState(PoiCategory.FUEL, center, PoiDataSource.OVERPASS, isLoading = true),
+            viewModel.uiState.value,
+        )
         assertEquals(
             FakePoiRepository.Request(center, SearchConfig.radiusMeters(PoiCategory.FUEL), setOf(PoiCategory.FUEL)),
             repository.requests.last(),
@@ -127,5 +138,20 @@ class NearbyMapViewModelTest {
 
         assertEquals(ErrorReason.SERVICE, viewModel.uiState.value.error)
         assertEquals(2, repository.requests.size)
+    }
+
+    @Test
+    fun `changing the data source searches again and shows it`() = runTest {
+        val viewModel = collectedViewModel()
+        repository.answer(0, Result.success(listOf(place("osm", 38.73))))
+        runCurrent()
+
+        settings.setPoiDataSource(PoiDataSource.GOOGLE_PLACES)
+        runCurrent()
+
+        assertEquals(2, repository.requests.size)
+        assertEquals(PoiDataSource.GOOGLE_PLACES, repository.requests.last().source)
+        assertEquals(PoiDataSource.GOOGLE_PLACES, viewModel.uiState.value.dataSource)
+        assertTrue(viewModel.uiState.value.isLoading)
     }
 }
