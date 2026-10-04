@@ -3,12 +3,9 @@ package com.majidbahmani.rota.ui.map
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -44,10 +41,17 @@ import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
 
-/** Holds the map once it's ready, so buttons outside the map can move the camera. */
-@Stable
-class PlacesMapState {
-    internal var map: MapLibreMap? by mutableStateOf(null)
+/**
+ * Talks to the MapLibre map. A plain class, not Compose state: it keeps the latest data and
+ * applies it once the map and its style are ready (the style loads asynchronously).
+ */
+class PlacesMapController {
+    private var map: MapLibreMap? = null
+    private var style: Style? = null
+    private var center: GeoPoint? = null
+    private var places: List<NearbyPoi> = emptyList()
+    private var placeNames: Map<String, String> = emptyMap()
+    private var selectedPlaceId: String? = null
 
     fun zoomIn() {
         map?.animateCamera(CameraUpdateFactory.zoomIn())
@@ -56,30 +60,90 @@ class PlacesMapState {
     fun zoomOut() {
         map?.animateCamera(CameraUpdateFactory.zoomOut())
     }
+
+    internal fun onMapReady(map: MapLibreMap) {
+        this.map = map
+    }
+
+    internal fun onStyleLoaded(style: Style) {
+        this.style = style
+        style.addPlaceLayers()
+        applyPlaces()
+        applySelection()
+        showAll()
+    }
+
+    /** New results: draw them and show all of them with the search centre. */
+    internal fun showPlaces(center: GeoPoint, places: List<NearbyPoi>, placeNames: Map<String, String>) {
+        this.center = center
+        this.places = places
+        this.placeNames = placeNames
+        applyPlaces()
+        showAll()
+    }
+
+    /** Highlight the place and zoom to it; null clears the highlight. */
+    internal fun select(placeId: String?) {
+        selectedPlaceId = placeId
+        applySelection()
+        focusSelected()
+    }
+
+    /** The map's size changed: keep the selected place in view, otherwise show all places. */
+    internal fun onSizeChanged() {
+        if (!focusSelected()) showAll()
+    }
+
+    private fun applyPlaces() {
+        val style = style ?: return
+        center?.let { style.getSourceAs<GeoJsonSource>(CENTER_SOURCE)?.setGeoJson(Point.fromLngLat(it.longitude, it.latitude)) }
+        style.getSourceAs<GeoJsonSource>(PLACES_SOURCE)?.setGeoJson(places.toFeatureCollection(placeNames))
+    }
+
+    private fun applySelection() {
+        style?.getLayerAs<CircleLayer>(SELECTED_LAYER)
+            ?.setFilter(Expression.eq(Expression.get(PROPERTY_ID), selectedPlaceId.orEmpty()))
+    }
+
+    private fun showAll() {
+        val center = center ?: return
+        if (places.isEmpty()) return
+        map?.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsOf(center, places), BOUNDS_PADDING_PX))
+    }
+
+    private fun focusSelected(): Boolean {
+        val place = places.firstOrNull { it.poi.id == selectedPlaceId } ?: return false
+        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(place.poi.location.toLatLng(), PLACE_ZOOM))
+        return true
+    }
 }
 
+/** A controller object, not state: `remember` only keeps the same instance across recompositions. */
 @Composable
-fun rememberPlacesMapState(): PlacesMapState = remember { PlacesMapState() }
+fun rememberPlacesMapController(): PlacesMapController = remember { PlacesMapController() }
 
 /**
  * MapLibre with free OpenStreetMap vector tiles: unlike the Google Maps SDK, it doesn't need
  * Google Play services, which AAOS doesn't provide for maps. Places are drawn as GeoJSON layers.
+ * Stateless: all screen state comes in as parameters (from the ViewModel).
  */
 @Composable
 fun PlacesMap(
-    state: PlacesMapState,
+    controller: PlacesMapController,
     center: GeoPoint,
     places: List<NearbyPoi>,
     placeNames: Map<String, String>,
     selectedPlaceId: String?,
     onPlaceClick: (String) -> Unit,
     modifier: Modifier = Modifier,
+    /** Change it after the map's size changed (e.g. the list folded) to re-fit the view. */
+    layoutVersion: Int = 0,
 ) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val currentOnPlaceClick by rememberUpdatedState(onPlaceClick)
-    var style by remember { mutableStateOf<Style?>(null) }
 
+    // An Android View, not state; it must stay the same instance (and never go into a ViewModel).
     val mapView = remember {
         MapLibre.getInstance(context)
         MapView(context).apply { onCreate(null) }
@@ -108,10 +172,8 @@ fun PlacesMap(
             map.uiSettings.setRotateGesturesEnabled(false)
             map.uiSettings.setTiltGesturesEnabled(false)
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(center.toLatLng(), DEFAULT_ZOOM))
-            map.setStyle(Style.Builder().fromUri(STYLE_URL)) { loaded ->
-                loaded.addPlaceLayers()
-                style = loaded
-            }
+            controller.onMapReady(map)
+            map.setStyle(Style.Builder().fromUri(STYLE_URL)) { loaded -> controller.onStyleLoaded(loaded) }
             map.addOnMapClickListener { point ->
                 val screenPoint = map.projection.toScreenLocation(point)
                 val id = map.queryRenderedFeatures(screenPoint, PLACES_LAYER)
@@ -120,29 +182,13 @@ fun PlacesMap(
                 id?.let(currentOnPlaceClick)
                 id != null
             }
-            state.map = map
         }
     }
 
-    // New results: update the markers and show all of them with the search centre.
-    LaunchedEffect(style, places, placeNames, center) {
-        val loaded = style ?: return@LaunchedEffect
-        loaded.getSourceAs<GeoJsonSource>(CENTER_SOURCE)?.setGeoJson(Point.fromLngLat(center.longitude, center.latitude))
-        loaded.getSourceAs<GeoJsonSource>(PLACES_SOURCE)?.setGeoJson(places.toFeatureCollection(placeNames))
-        if (places.isNotEmpty()) {
-            state.map?.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsOf(center, places), BOUNDS_PADDING_PX))
-        }
-    }
-
-    // Selection: highlight the place and zoom to it.
-    LaunchedEffect(style, selectedPlaceId) {
-        val loaded = style ?: return@LaunchedEffect
-        loaded.getLayerAs<CircleLayer>(SELECTED_LAYER)
-            ?.setFilter(Expression.eq(Expression.get(PROPERTY_ID), selectedPlaceId.orEmpty()))
-        places.firstOrNull { it.poi.id == selectedPlaceId }?.let { place ->
-            state.map?.animateCamera(CameraUpdateFactory.newLatLngZoom(place.poi.location.toLatLng(), PLACE_ZOOM))
-        }
-    }
+    // Each effect forwards one kind of change to the controller.
+    LaunchedEffect(center, places, placeNames) { controller.showPlaces(center, places, placeNames) }
+    LaunchedEffect(selectedPlaceId) { controller.select(selectedPlaceId) }
+    LaunchedEffect(layoutVersion) { if (layoutVersion > 0) controller.onSizeChanged() }
 
     AndroidView(factory = { mapView }, modifier = modifier)
 }

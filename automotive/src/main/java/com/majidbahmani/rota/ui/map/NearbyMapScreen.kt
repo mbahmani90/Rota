@@ -1,5 +1,6 @@
 package com.majidbahmani.rota.ui.map
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,9 +29,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -55,17 +54,19 @@ fun NearbyMapRoute(
     viewModel: NearbyMapViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var showDataSourceDialog by remember { mutableStateOf(false) }
 
     NearbyMapScreen(
         uiState = uiState,
         onCategorySelected = viewModel::onCategorySelected,
         onRetry = viewModel::retry,
-        onChangeDataSource = { showDataSourceDialog = true },
+        onPlaceSelected = viewModel::onPlaceSelected,
+        onChangeDataSource = viewModel::onChangeDataSource,
+        onTogglePanel = viewModel::onTogglePanel,
+        onPanelAnimationFinished = viewModel::onPanelAnimationFinished,
         modifier = modifier,
     )
-    if (showDataSourceDialog) {
-        DataSourceDialogRoute(onDismiss = { showDataSourceDialog = false })
+    if (uiState.showDataSourceDialog) {
+        DataSourceDialogRoute(onDismiss = viewModel::onDataSourceDialogDismissed)
     }
 }
 
@@ -74,40 +75,65 @@ fun NearbyMapScreen(
     uiState: NearbyMapUiState,
     onCategorySelected: (PoiCategory) -> Unit,
     onRetry: () -> Unit,
+    onPlaceSelected: (String) -> Unit,
     onChangeDataSource: () -> Unit,
+    onTogglePanel: () -> Unit,
+    onPanelAnimationFinished: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val mapState = rememberPlacesMapState()
-    // Selection is screen-only state shared by the list and the map; new results clear it.
-    var selectedPlaceId by remember(uiState.places) { mutableStateOf<String?>(null) }
+    val mapController = rememberPlacesMapController()
     val placeNames = uiState.places.associate { it.poi.id to it.poi.displayName() }
+    val panelWidth by animateDpAsState(
+        targetValue = if (uiState.panelExpanded) PANEL_WIDTH else 0.dp,
+        label = "panelWidth",
+        // The map has its new size only once the animation ends.
+        finishedListener = { onPanelAnimationFinished() },
+    )
 
     Row(modifier = modifier.fillMaxSize()) {
         PlacesPanel(
             uiState = uiState,
-            selectedPlaceId = selectedPlaceId,
+            selectedPlaceId = uiState.selectedPlaceId,
             onCategorySelected = onCategorySelected,
             onRetry = onRetry,
             onChangeDataSource = onChangeDataSource,
-            onPlaceClick = { selectedPlaceId = it.poi.id },
-            modifier = Modifier.width(PANEL_WIDTH).fillMaxHeight(),
+            onPlaceClick = { onPlaceSelected(it.poi.id) },
+            // Fixed inner width, clipped by the animated outer width: content doesn't reflow while folding.
+            modifier = Modifier.width(panelWidth).fillMaxHeight(),
         )
         Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
             PlacesMap(
-                state = mapState,
+                controller = mapController,
                 center = uiState.center,
                 places = uiState.places,
                 placeNames = placeNames,
-                selectedPlaceId = selectedPlaceId,
-                onPlaceClick = { selectedPlaceId = it },
+                selectedPlaceId = uiState.selectedPlaceId,
+                onPlaceClick = onPlaceSelected,
+                layoutVersion = uiState.mapLayoutVersion,
                 modifier = Modifier.fillMaxSize(),
             )
+            PanelToggleButton(
+                expanded = uiState.panelExpanded,
+                onClick = onTogglePanel,
+                modifier = Modifier.align(Alignment.TopStart).padding(16.dp),
+            )
             ZoomButtons(
-                onZoomIn = mapState::zoomIn,
-                onZoomOut = mapState::zoomOut,
+                onZoomIn = mapController::zoomIn,
+                onZoomOut = mapController::zoomOut,
                 modifier = Modifier.align(Alignment.CenterEnd).padding(16.dp),
             )
         }
+    }
+}
+
+@Composable
+private fun PanelToggleButton(expanded: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val description = stringResource(if (expanded) R.string.action_hide_list else R.string.action_show_list)
+    FilledTonalButton(
+        onClick = onClick,
+        modifier = modifier.size(ZOOM_BUTTON_SIZE).semantics { contentDescription = description },
+    ) {
+        Text(if (expanded) "‹" else "›", fontSize = 30.sp)
     }
 }
 
@@ -122,7 +148,8 @@ private fun PlacesPanel(
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
-        Column {
+        // Anchored to the start and wider than the folding Surface, which clips it.
+        Column(modifier = Modifier.wrapContentWidth(Alignment.Start, unbounded = true).width(PANEL_WIDTH)) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

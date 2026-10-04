@@ -14,6 +14,8 @@
     <string name="action_retry">Retry</string>
     <string name="action_zoom_in">Zoom in</string>
     <string name="action_zoom_out">Zoom out</string>
+    <string name="action_hide_list">Hide list</string>
+    <string name="action_show_list">Show list</string>
 
     <string name="distance_meters">%1$d m</string>
     <string name="distance_kilometers">%1$.1f km</string>
