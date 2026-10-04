@@ -22,3 +22,7 @@ local.properties
 
 # Personal notes / playbook
 /doc/
+
+# Signing keys (never commit; CI gets them from encrypted secrets)
+*.jks
+*.keystore

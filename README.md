@@ -209,6 +209,24 @@ The key goes `local.properties` → `BuildConfig` → an OkHttp interceptor that
 - **Fakes over mocks**: domain interfaces make hand-written fakes easy; repository fakes can suspend until the test answers, to test cancellation and ordering.
 - **Coroutines**: `runTest`, `runCurrent()`, a `MainDispatcherRule` for `viewModelScope`, collectors in `backgroundScope` for lazy `StateFlow`s.
 
+## Releases
+
+Pushing a version tag runs the [release workflow](.github/workflows/release.yml):
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+It builds **signed release APKs** for AAOS and the phone (Android Auto), verifies their signatures and publishes a
+**GitHub Release** with `rota-automotive-<version>.apk`, `rota-mobile-<version>.apk`, SHA-256 checksums and notes generated
+from the merged pull requests. Version from the tag: `v1.2.3` → versionName `1.2.3`, versionCode `10203`.
+
+The signing keystore and its passwords are **encrypted repository secrets** (`ROTA_KEYSTORE_BASE64`,
+`ROTA_KEYSTORE_PASSWORD`, `ROTA_KEY_ALIAS`, `ROTA_KEY_PASSWORD`); Gradle reads them only from environment variables, so
+local release builds are unsigned and nothing secret is in the repository. Releases don't contain a Google API key
+(Overpass is used).
+
 ## Known limitations
 
 - Search centre fixed to Lisbon (no real location yet).
