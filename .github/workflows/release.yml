@@ -10,15 +10,19 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-# contents: write is needed to create the GitHub Release.
+# Read-only by default; only the publish job may write (create the release).
 permissions:
-  contents: write
+  contents: read
 
+# Two jobs: "Build signed APKs" is the only one with the signing secrets;
+# "Publish GitHub Release" is the only one with write access and never sees the keystore.
 jobs:
-  release:
-    name: Build and publish release
+  build:
+    name: Build signed APKs
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.name }}
 
     steps:
       - name: Check out
@@ -47,7 +51,7 @@ jobs:
           echo "code=$CODE" >> "$GITHUB_OUTPUT"
           echo "Version $VERSION ($CODE)"
 
-      # The keystore is stored base64-encoded in an encrypted secret; it only exists during the run.
+      # The keystore is stored base64-encoded in an encrypted secret; it only exists during this job.
       - name: Decode signing keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.ROTA_KEYSTORE_BASE64 }}
@@ -63,7 +67,8 @@ jobs:
       - name: Build signed release APKs
         env:
           ROTA_KEYSTORE_PASSWORD: ${{ secrets.ROTA_KEYSTORE_PASSWORD }}
-          ROTA_KEY_ALIAS: ${{ secrets.ROTA_KEY_ALIAS }}
+          # The alias isn't secret; as a secret, GitHub would mask the word everywhere in the logs.
+          ROTA_KEY_ALIAS: rota
           ROTA_KEY_PASSWORD: ${{ secrets.ROTA_KEY_PASSWORD }}
         run: >-
           ./gradlew assembleRelease
@@ -75,7 +80,11 @@ jobs:
           APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner"
           for apk in automotive/build/outputs/apk/release/automotive-release.apk \
                      mobile/build/outputs/apk/release/mobile-release.apk; do
-            "$APKSIGNER" verify --print-certs "$apk" | grep "Signer #1 certificate DN"
+            # The exit code decides: verify fails for unsigned or broken APKs.
+            "$APKSIGNER" verify "$apk"
+            # Certificate details only for the log; the output format differs between versions.
+            echo "$apk:"
+            "$APKSIGNER" verify --print-certs "$apk" | grep -E "certificate (DN|SHA-256 digest)" || true
           done
 
       - name: Collect release files
@@ -88,17 +97,43 @@ jobs:
           (cd dist && sha256sum *.apk > SHA256SUMS.txt)
           cat dist/SHA256SUMS.txt
 
+      # Hands the signed APKs and checksums to the publish job (a fresh machine).
+      - name: Upload release files
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-files
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove signing keystore
+        if: ${{ always() }}
+        run: rm -f "$RUNNER_TEMP/release.jks"
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The only job allowed to write: it creates the release. No secrets, no checkout.
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download release files
+        uses: actions/download-artifact@v8
+        with:
+          name: release-files
+          path: dist
+
       # Release notes are generated from the merged pull requests since the previous tag.
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.name }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.build.outputs.version }}
         run: >-
           gh release create "$GITHUB_REF_NAME" dist/*
           --title "Rota $VERSION"
           --generate-notes
           --verify-tag
-
-      - name: Remove signing keystore
-        if: ${{ always() }}
-        run: rm -f "$RUNNER_TEMP/release.jks"
