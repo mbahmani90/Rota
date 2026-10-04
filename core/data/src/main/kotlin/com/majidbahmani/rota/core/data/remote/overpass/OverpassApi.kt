@@ -1,6 +1,6 @@
-package com.majidbahmani.rota.core.data.remote
+package com.majidbahmani.rota.core.data.remote.overpass
 
-import com.majidbahmani.rota.core.data.remote.dto.OverpassResponseDto
+import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassResponseDto
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST

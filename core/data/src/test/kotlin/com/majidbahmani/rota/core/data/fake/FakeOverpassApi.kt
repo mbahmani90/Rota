@@ -1,7 +1,7 @@
 package com.majidbahmani.rota.core.data.fake
 
-import com.majidbahmani.rota.core.data.remote.OverpassApi
-import com.majidbahmani.rota.core.data.remote.dto.OverpassResponseDto
+import com.majidbahmani.rota.core.data.remote.overpass.OverpassApi
+import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassResponseDto
 
 /** Records queries and returns [response], or throws [error] when set. */
 class FakeOverpassApi(
