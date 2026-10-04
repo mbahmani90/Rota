@@ -23,21 +23,18 @@ fun PoiCategory.toGooglePlaceType(): String = when (this) {
     PoiCategory.PARKING -> TYPE_PARKING
 }
 
-fun searchNearbyRequest(
-    center: GeoPoint,
-    radiusMeters: Int,
-    categories: Set<PoiCategory>,
-): SearchNearbyRequestDto = SearchNearbyRequestDto(
-    includedTypes = PoiCategory.entries.filter { it in categories }.map { it.toGooglePlaceType() },
-    maxResultCount = GooglePlacesApi.MAX_RESULT_COUNT,
-    locationRestriction = LocationRestrictionDto(
-        circle = CircleDto(
-            center = LatLngDto(center.latitude, center.longitude),
-            radius = radiusMeters.toDouble(),
+fun searchNearbyRequest(center: GeoPoint, radiusMeters: Int, categories: Set<PoiCategory>): SearchNearbyRequestDto =
+    SearchNearbyRequestDto(
+        includedTypes = PoiCategory.entries.filter { it in categories }.map { it.toGooglePlaceType() },
+        maxResultCount = GooglePlacesApi.MAX_RESULT_COUNT,
+        locationRestriction = LocationRestrictionDto(
+            circle = CircleDto(
+                center = LatLngDto(center.latitude, center.longitude),
+                radius = radiusMeters.toDouble(),
+            ),
         ),
-    ),
-    rankPreference = GooglePlacesApi.RANK_BY_DISTANCE,
-)
+        rankPreference = GooglePlacesApi.RANK_BY_DISTANCE,
+    )
 
 /** Places that aren't a supported category or have no location are dropped. */
 fun SearchNearbyResponseDto.toDomain(): List<Poi> = places.mapNotNull { it.toDomain() }

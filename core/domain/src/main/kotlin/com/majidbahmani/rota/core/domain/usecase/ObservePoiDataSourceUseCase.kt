@@ -2,10 +2,10 @@ package com.majidbahmani.rota.core.domain.usecase
 
 import com.majidbahmani.rota.core.domain.model.PoiDataSource
 import com.majidbahmani.rota.core.domain.repository.SettingsRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 /**
  * The POI source to use: the saved choice if it's available on this build, otherwise Google

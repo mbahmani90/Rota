@@ -13,11 +13,7 @@ class GooglePlacesPoiDataSource @Inject constructor(
     private val api: GooglePlacesApi,
 ) : PoiRemoteDataSource {
 
-    override suspend fun getNearbyPois(
-        center: GeoPoint,
-        radiusMeters: Int,
-        categories: Set<PoiCategory>,
-    ): List<Poi> {
+    override suspend fun getNearbyPois(center: GeoPoint, radiusMeters: Int, categories: Set<PoiCategory>): List<Poi> {
         // Google rejects a radius above 50 km with HTTP 400.
         val radius = radiusMeters.coerceAtMost(MAX_RADIUS_METERS)
         return api.searchNearby(searchNearbyRequest(center, radius, categories)).toDomain()

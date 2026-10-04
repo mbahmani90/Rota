@@ -3,13 +3,15 @@ package com.majidbahmani.rota.shared.presenter.nearby
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
-import com.majidbahmani.rota.core.domain.model.PoiDetails
 import com.majidbahmani.rota.core.domain.model.PoiDataSource
+import com.majidbahmani.rota.core.domain.model.PoiDetails
 import com.majidbahmani.rota.core.domain.usecase.GetNearbyPoisUseCase
 import com.majidbahmani.rota.core.domain.usecase.ObservePoiDataSourceUseCase
 import com.majidbahmani.rota.shared.fake.FakePoiRepository
 import com.majidbahmani.rota.shared.fake.FakeSettingsRepository
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesUiState.ErrorReason
+import java.io.IOException
+import java.net.SocketTimeoutException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -20,8 +22,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.io.IOException
-import java.net.SocketTimeoutException
 
 // runCurrent() is still experimental in kotlinx-coroutines-test.
 @OptIn(ExperimentalCoroutinesApi::class)

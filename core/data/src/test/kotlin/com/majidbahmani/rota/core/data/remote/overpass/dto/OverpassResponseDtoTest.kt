@@ -60,7 +60,7 @@ class OverpassResponseDtoTest {
     fun `element without tags and runtime error remark decode`() {
         val response = decode(
             """{"elements":[{"type":"node","id":1,"lat":1.0,"lon":2.0}],
-               "remark":"runtime error: Query timed out"}"""
+               "remark":"runtime error: Query timed out"}""",
         )
 
         assertEquals(emptyMap<String, String>(), response.elements.single().tags)

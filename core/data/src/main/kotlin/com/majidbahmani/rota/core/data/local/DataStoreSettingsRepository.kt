@@ -8,12 +8,12 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.majidbahmani.rota.core.data.remote.google.GooglePlacesConfig
 import com.majidbahmani.rota.core.domain.model.PoiDataSource
 import com.majidbahmani.rota.core.domain.repository.SettingsRepository
+import java.io.IOException
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import java.io.IOException
-import javax.inject.Inject
 
 /** Stores settings; the rules for using them are in the domain's use cases. */
 class DataStoreSettingsRepository @Inject constructor(

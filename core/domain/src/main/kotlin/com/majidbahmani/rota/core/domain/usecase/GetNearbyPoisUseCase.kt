@@ -5,8 +5,8 @@ import com.majidbahmani.rota.core.domain.model.NearbyPoi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import com.majidbahmani.rota.core.domain.model.distanceTo
 import com.majidbahmani.rota.core.domain.repository.PoiRepository
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 
 /**
  * Nearest POIs first, each with its distance from [center], from the data source currently

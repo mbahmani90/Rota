@@ -4,8 +4,8 @@ import com.majidbahmani.rota.core.domain.fake.FakeSettingsRepository
 import com.majidbahmani.rota.core.domain.model.PoiDataSource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -47,9 +47,9 @@ class ObservePoiDataSourceUseCaseTest {
         val repository = FakeSettingsRepository(all, saved = PoiDataSource.OVERPASS)
         val values = mutableListOf<PoiDataSource>()
         val job = launch { ObservePoiDataSourceUseCase(repository)().take(2).toList(values) }
-        runCurrent()   // let the collector receive the current value first
+        runCurrent() // let the collector receive the current value first
 
-        repository.setPoiDataSource(PoiDataSource.OVERPASS)   // same value: not emitted again
+        repository.setPoiDataSource(PoiDataSource.OVERPASS) // same value: not emitted again
         runCurrent()
         repository.setPoiDataSource(PoiDataSource.GOOGLE_PLACES)
         job.join()

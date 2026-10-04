@@ -30,7 +30,8 @@ class SettingsViewModelTest {
 
     @Test
     fun `shows the current and available sources`() = runTest {
-        val viewModel = collectedViewModel(FakeSettingsRepository(availablePoiDataSources = setOf(PoiDataSource.OVERPASS)))
+        val viewModel =
+            collectedViewModel(FakeSettingsRepository(availablePoiDataSources = setOf(PoiDataSource.OVERPASS)))
 
         assertEquals(
             SettingsUiState(selected = PoiDataSource.OVERPASS, available = setOf(PoiDataSource.OVERPASS)),
@@ -50,7 +51,8 @@ class SettingsViewModelTest {
 
     @Test
     fun `an unavailable source can't be selected`() = runTest {
-        val viewModel = collectedViewModel(FakeSettingsRepository(availablePoiDataSources = setOf(PoiDataSource.OVERPASS)))
+        val viewModel =
+            collectedViewModel(FakeSettingsRepository(availablePoiDataSources = setOf(PoiDataSource.OVERPASS)))
 
         viewModel.onDataSourceSelected(PoiDataSource.GOOGLE_PLACES)
         runCurrent()

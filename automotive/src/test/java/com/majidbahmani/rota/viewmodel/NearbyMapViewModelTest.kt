@@ -12,6 +12,7 @@ import com.majidbahmani.rota.fake.FakePoiRepository
 import com.majidbahmani.rota.fake.FakeSettingsRepository
 import com.majidbahmani.rota.util.MainDispatcherRule
 import com.majidbahmani.rota.viewmodel.NearbyMapUiState.ErrorReason
+import java.io.IOException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -22,7 +23,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
-import java.io.IOException
 
 // runCurrent() is still experimental in kotlinx-coroutines-test.
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -64,7 +64,13 @@ class NearbyMapViewModelTest {
             viewModel.uiState.value,
         )
         assertEquals(
-            listOf(FakePoiRepository.Request(center, SearchConfig.radiusMeters(PoiCategory.EV_CHARGER), setOf(PoiCategory.EV_CHARGER))),
+            listOf(
+                FakePoiRepository.Request(
+                    center,
+                    SearchConfig.radiusMeters(PoiCategory.EV_CHARGER),
+                    setOf(PoiCategory.EV_CHARGER),
+                ),
+            ),
             repository.requests,
         )
     }

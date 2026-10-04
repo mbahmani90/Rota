@@ -28,4 +28,3 @@ include(":automotive")
 include(":shared")
 include(":core:domain")
 include(":core:data")
- 

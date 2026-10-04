@@ -13,7 +13,7 @@ fun PoiCategory.title(): String = stringResource(
         PoiCategory.EV_CHARGER -> R.string.category_ev_charger
         PoiCategory.FUEL -> R.string.category_fuel
         PoiCategory.PARKING -> R.string.category_parking
-    }
+    },
 )
 
 /** The POI's name, or its category when the source has none. */
@@ -23,14 +23,13 @@ fun Poi.displayName(): String = name ?: stringResource(
         PoiCategory.EV_CHARGER -> R.string.category_ev_charger_single
         PoiCategory.FUEL -> R.string.category_fuel_single
         PoiCategory.PARKING -> R.string.category_parking_single
-    }
+    },
 )
 
 /** Under 1 km to the nearest 10 m (no false GPS precision), otherwise km with one decimal. */
 @Composable
-fun distanceText(meters: Double): String =
-    if (meters < 1_000) {
-        stringResource(R.string.distance_meters, (meters / 10).roundToInt() * 10)
-    } else {
-        stringResource(R.string.distance_kilometers, meters / 1_000)
-    }
+fun distanceText(meters: Double): String = if (meters < 1_000) {
+    stringResource(R.string.distance_meters, (meters / 10).roundToInt() * 10)
+} else {
+    stringResource(R.string.distance_kilometers, meters / 1_000)
+}

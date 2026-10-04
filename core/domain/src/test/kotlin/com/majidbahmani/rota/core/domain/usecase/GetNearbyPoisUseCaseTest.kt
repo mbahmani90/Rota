@@ -7,12 +7,12 @@ import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import com.majidbahmani.rota.core.domain.model.PoiDataSource
 import com.majidbahmani.rota.core.domain.model.PoiDetails
+import java.io.IOException
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.IOException
 
 class GetNearbyPoisUseCaseTest {
 
@@ -36,7 +36,7 @@ class GetNearbyPoisUseCaseTest {
     fun `results are sorted by distance with distances`() = runTest {
         // 0.01° of latitude ≈ 1.1 km
         repository.result = Result.success(
-            listOf(fuel("far", 38.7423), fuel("near", 38.7233), fuel("middle", 38.7323))
+            listOf(fuel("far", 38.7423), fuel("near", 38.7233), fuel("middle", 38.7323)),
         )
 
         val nearby = getNearbyPois(center, radiusMeters = 3000, categories = setOf(PoiCategory.FUEL)).getOrThrow()

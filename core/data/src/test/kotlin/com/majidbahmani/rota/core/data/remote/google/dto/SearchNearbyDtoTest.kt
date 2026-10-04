@@ -63,7 +63,7 @@ class SearchNearbyDtoTest {
                   },
                   "rankPreference": "DISTANCE"
                 }
-                """
+                """,
             ).jsonObject,
             Json.parseToJsonElement(encoded).jsonObject,
         )

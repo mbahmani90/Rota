@@ -16,5 +16,4 @@ fun Context.signingCertificateSha1(): String? = try {
     null
 }
 
-fun ByteArray.sha1Hex(): String =
-    MessageDigest.getInstance("SHA-1").digest(this).joinToString("") { "%02X".format(it) }
+fun ByteArray.sha1Hex(): String = MessageDigest.getInstance("SHA-1").digest(this).joinToString("") { "%02X".format(it) }

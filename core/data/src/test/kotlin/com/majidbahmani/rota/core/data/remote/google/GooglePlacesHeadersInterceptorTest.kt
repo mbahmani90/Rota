@@ -38,7 +38,7 @@ class GooglePlacesHeadersInterceptorTest {
     @Test
     fun `adds the key, package and certificate`() {
         val request = sentRequest(
-            GooglePlacesHeadersInterceptor("test-key", "com.majidbahmani.rota") { "ABCDEF" }
+            GooglePlacesHeadersInterceptor("test-key", "com.majidbahmani.rota") { "ABCDEF" },
         )
 
         assertEquals("test-key", request.header("X-Goog-Api-Key"))

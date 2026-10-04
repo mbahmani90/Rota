@@ -96,7 +96,9 @@ class PlacesMapController {
 
     private fun applyPlaces() {
         val style = style ?: return
-        center?.let { style.getSourceAs<GeoJsonSource>(CENTER_SOURCE)?.setGeoJson(Point.fromLngLat(it.longitude, it.latitude)) }
+        center?.let {
+            style.getSourceAs<GeoJsonSource>(CENTER_SOURCE)?.setGeoJson(Point.fromLngLat(it.longitude, it.latitude))
+        }
         style.getSourceAs<GeoJsonSource>(PLACES_SOURCE)?.setGeoJson(places.toFeatureCollection(placeNames))
     }
 
@@ -210,7 +212,7 @@ private fun Style.addPlaceLayers() {
             circleColor("#2196F3"),
             circleStrokeWidth(3f),
             circleStrokeColor("#FFFFFF"),
-        )
+        ),
     )
     addLayer(
         CircleLayer(PLACES_LAYER, PLACES_SOURCE).withProperties(
@@ -218,7 +220,7 @@ private fun Style.addPlaceLayers() {
             circleColor("#FF7043"),
             circleStrokeWidth(2f),
             circleStrokeColor("#FFFFFF"),
-        )
+        ),
     )
     addLayer(
         CircleLayer(SELECTED_LAYER, PLACES_SOURCE)
@@ -228,7 +230,7 @@ private fun Style.addPlaceLayers() {
                 circleColor("#FFCA28"),
                 circleStrokeWidth(3f),
                 circleStrokeColor("#FFFFFF"),
-            )
+            ),
     )
     addLayer(
         SymbolLayer(LABELS_LAYER, PLACES_SOURCE).withProperties(
@@ -241,7 +243,7 @@ private fun Style.addPlaceLayers() {
             textHaloWidth(1.5f),
             textAnchor("top"),
             textOffset(arrayOf(0f, 1.2f)),
-        )
+        ),
     )
 }
 
@@ -252,16 +254,15 @@ private fun List<NearbyPoi>.toFeatureCollection(names: Map<String, String>): Fea
                 addStringProperty(PROPERTY_ID, place.poi.id)
                 addStringProperty(PROPERTY_NAME, names[place.poi.id].orEmpty())
             }
-        }
+        },
     )
 
 private fun GeoPoint.toLatLng() = LatLng(latitude, longitude)
 
-private fun boundsOf(center: GeoPoint, places: List<NearbyPoi>): LatLngBounds =
-    LatLngBounds.Builder()
-        .include(center.toLatLng())
-        .includes(places.map { it.poi.location.toLatLng() })
-        .build()
+private fun boundsOf(center: GeoPoint, places: List<NearbyPoi>): LatLngBounds = LatLngBounds.Builder()
+    .include(center.toLatLng())
+    .includes(places.map { it.poi.location.toLatLng() })
+    .build()
 
 // OpenFreeMap: free OpenStreetMap vector tiles without a key; dark for the car.
 private const val STYLE_URL = "https://tiles.openfreemap.org/styles/dark"

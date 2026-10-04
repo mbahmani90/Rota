@@ -8,9 +8,5 @@ import com.majidbahmani.rota.core.domain.model.PoiCategory
 interface PoiRemoteDataSource {
 
     /** The repository has already checked that [radiusMeters] > 0 and [categories] isn't empty. */
-    suspend fun getNearbyPois(
-        center: GeoPoint,
-        radiusMeters: Int,
-        categories: Set<PoiCategory>,
-    ): List<Poi>
+    suspend fun getNearbyPois(center: GeoPoint, radiusMeters: Int, categories: Set<PoiCategory>): List<Poi>
 }

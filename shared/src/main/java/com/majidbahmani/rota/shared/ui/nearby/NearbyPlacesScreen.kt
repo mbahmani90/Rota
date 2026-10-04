@@ -17,12 +17,12 @@ import androidx.car.app.versioning.CarAppApiLevels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.majidbahmani.rota.core.domain.config.SearchConfig
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.NearbyPoi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import com.majidbahmani.rota.core.domain.usecase.GetNearbyPoisUseCase
 import com.majidbahmani.rota.shared.R
-import com.majidbahmani.rota.core.domain.config.SearchConfig
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesStateHolder
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesUiState
 import com.majidbahmani.rota.shared.presenter.nearby.NearbyPlacesUiState.ErrorReason
@@ -72,10 +72,13 @@ class NearbyPlacesScreen(
         // Errors stay in this template: switching template types would count as a new step.
         when (state) {
             NearbyPlacesUiState.Loading -> template.setLoading(true)
+
             is NearbyPlacesUiState.Success -> template.setItemList(placeList(state.places))
-            is NearbyPlacesUiState.Error -> template
-                .setItemList(ItemList.Builder().setNoItemsMessage(state.reason.message()).build())
-                .setActionStrip(retryActionStrip())
+
+            is NearbyPlacesUiState.Error ->
+                template
+                    .setItemList(ItemList.Builder().setNoItemsMessage(state.reason.message()).build())
+                    .setActionStrip(retryActionStrip())
         }
         return template.build()
     }
@@ -95,9 +98,9 @@ class NearbyPlacesScreen(
                 .setPlace(
                     Place.Builder(poi.location.toCarLocation())
                         .setMarker(PlaceMarker.Builder().build())
-                        .build()
+                        .build(),
                 )
-                .build()
+                .build(),
         )
         .build()
 
@@ -106,23 +109,22 @@ class NearbyPlacesScreen(
             Action.Builder()
                 .setTitle(carContext.getString(R.string.action_retry))
                 .setOnClickListener { stateHolder.retry() }
-                .build()
+                .build(),
         )
         .build()
 
-    private fun placeListLimit(): Int =
-        if (carContext.carAppApiLevel >= CarAppApiLevels.LEVEL_2) {
-            carContext.getCarService(ConstraintManager::class.java)
-                .getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST)
-        } else {
-            DEFAULT_PLACE_LIST_LIMIT
-        }
+    private fun placeListLimit(): Int = if (carContext.carAppApiLevel >= CarAppApiLevels.LEVEL_2) {
+        carContext.getCarService(ConstraintManager::class.java)
+            .getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST)
+    } else {
+        DEFAULT_PLACE_LIST_LIMIT
+    }
 
     private fun ErrorReason.message(): String = carContext.getString(
         when (this) {
             ErrorReason.NO_CONNECTION -> R.string.error_no_connection
             ErrorReason.SERVICE -> R.string.error_service
-        }
+        },
     )
 
     private companion object {

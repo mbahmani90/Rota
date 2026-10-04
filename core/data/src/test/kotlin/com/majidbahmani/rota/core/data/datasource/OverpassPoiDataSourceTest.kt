@@ -6,12 +6,12 @@ import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassElementDto
 import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassResponseDto
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.PoiCategory
+import java.io.IOException
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.IOException
 
 class OverpassPoiDataSourceTest {
 
@@ -31,7 +31,7 @@ class OverpassPoiDataSourceTest {
             elements = listOf(
                 OverpassElementDto(type = "node", id = 1, lat = 1.0, lon = 2.0, tags = mapOf("amenity" to "fuel")),
                 OverpassElementDto(type = "node", id = 2, lat = 1.0, lon = 2.0, tags = mapOf("amenity" to "cafe")),
-            )
+            ),
         )
 
         assertEquals(listOf("node/1"), search().map { it.id })
