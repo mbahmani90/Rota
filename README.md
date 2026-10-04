@@ -1,5 +1,7 @@
 # Rota
 
+[![CI](https://github.com/mbahmani90/Rota/actions/workflows/ci.yml/badge.svg)](https://github.com/mbahmani90/Rota/actions/workflows/ci.yml)
+
 Find **EV chargers, fuel stations and parking** near you, in the car.
 
 Rota runs on both car platforms:
@@ -172,7 +174,7 @@ The key goes `local.properties` → `BuildConfig` → an OkHttp interceptor that
 
 ## Testing
 
-**95 JVM unit tests**, no emulator needed:
+**95 JVM unit tests**, no emulator needed; [CI](.github/workflows/ci.yml) runs them on every pull request and push to `main`, together with the build and Android Lint:
 
 ```bash
 ./gradlew :core:domain:test :core:data:testDebugUnitTest :shared:testDebugUnitTest :automotive:testDebugUnitTest
