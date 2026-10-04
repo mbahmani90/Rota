@@ -11,6 +11,19 @@ Rota runs on both car platforms:
 
 Both share the same domain and data layers. Places come from **OpenStreetMap (Overpass API)**, free and without a key, or from **Google Places (New)** with an API key; the user can switch between them.
 
+## Screenshots
+
+AAOS emulator (Automotive 1408×792), data from OpenStreetMap:
+
+<p>
+  <img src="docs/screenshots/01-ev-chargers-selection.png" width="49%" alt="EV chargers: list panel and map, selected charger highlighted in both">
+  <img src="docs/screenshots/02-fuel-panel-folded.png" width="49%" alt="Fuel stations with the list panel folded: full-width map">
+</p>
+
+| EV chargers: list ↔ map selection | Fuel stations: panel folded, full-width map |
+|---|---|
+| Selecting a row highlights the charger on the map (yellow), and the other way round; nearest first, with distance and operator | The ‹ / › button folds the list so the map uses the whole screen; zoom with + / − |
+
 ## Features
 
 - Nearby EV chargers, fuel stations and parking, **nearest first**, with distance and address
