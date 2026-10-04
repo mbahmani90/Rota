@@ -54,42 +54,10 @@ graph LR
 
 ### Layers and data flow
 
-```mermaid
-graph TD
-    subgraph Presentation
-        AAOS["AAOS: NearbyMapScreen + NearbyMapViewModel"]
-        AA["Android Auto: NearbyPlacesScreen + NearbyPlacesStateHolder"]
-        SET["DataSourceDialog + SettingsViewModel"]
-    end
-    subgraph Domain
-        GET["GetNearbyPoisUseCase<br/>nearest first"]
-        OBS["ObservePoiDataSourceUseCase<br/>which source to use"]
-        SETUC["SetPoiDataSourceUseCase"]
-        PR(["PoiRepository"])
-        SR(["SettingsRepository"])
-    end
-    subgraph Data
-        PRI["PoiRepositoryImpl<br/>routes by source"]
-        OV["OverpassPoiDataSource"]
-        GP["GooglePlacesPoiDataSource"]
-        DS["DataStoreSettingsRepository"]
-    end
-    AAOS --> GET
-    AAOS --> OBS
-    AA --> GET
-    SET --> OBS
-    SET --> SETUC
-    GET --> OBS
-    GET --> PR
-    OBS --> SR
-    SETUC --> SR
-    PR -. implements .- PRI
-    SR -. implements .- DS
-    PRI --> OV
-    PRI --> GP
-    OV --> OVA["overpass-api.de"]
-    GP --> GPA["places.googleapis.com"]
-```
+![Rota: layers and data flow](docs/architecture-layers.svg)
+
+Presentation talks only to use cases; use cases hold the business rules and depend on repository
+interfaces; the data layer implements them and talks to the external services.
 
 ### Domain
 

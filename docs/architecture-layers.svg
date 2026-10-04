@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1028" width="1200" height="1028" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <marker id="arrowData" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowImpl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ffffff" stroke="#7c3aed" stroke-width="1.2"/>
+    </marker>
+    <style>
+      .group { fill: none; stroke-width: 1.4; stroke-dasharray: 5 4; }
+      .ui { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; }
+      .state { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.5; }
+      .usecase { fill: #fce7f3; stroke: #db2777; stroke-width: 1.6; }
+      .iface { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 1.5; }
+      .data { fill: #e0e7ff; stroke: #4f46e5; stroke-width: 1.5; }
+      .store { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; }
+      .ext { fill: #ffedd5; stroke: #ea580c; stroke-width: 1.5; }
+      .title { font-size: 15px; font-weight: 700; fill: #111827; }
+      .sub { font-size: 11.5px; fill: #374151; font-family: Menlo, Consolas, monospace; }
+      .groupLabel { font-size: 12px; font-weight: 700; letter-spacing: 0.4px; }
+      .layer { font-size: 13px; font-weight: 700; fill: #6b7280; letter-spacing: 1px; }
+      .call { stroke: #374151; stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+      .dataLine { stroke: #2563eb; stroke-width: 1.6; fill: none; stroke-dasharray: 6 4; marker-end: url(#arrowData); }
+      .impl { stroke: #7c3aed; stroke-width: 1.5; fill: none; stroke-dasharray: 3 3; marker-end: url(#arrowImpl); }
+      .lbl { font-size: 11.5px; fill: #374151; }
+      .lblData { font-size: 11.5px; fill: #2563eb; }
+      .lblImpl { font-size: 11px; fill: #7c3aed; }
+    </style>
+  </defs>
+
+  <!-- Opaque background: readable in GitHub's light and dark themes -->
+  <rect width="1200" height="1028" fill="#ffffff"/>
+  <text x="40" y="36" font-size="21" font-weight="700" fill="#111827">Rota: layers and data flow</text>
+
+  <!-- Legend -->
+  <line x1="640" y1="32" x2="674" y2="32" class="call"/>
+  <text x="680" y="36" class="lbl">call</text>
+  <line x1="716" y1="32" x2="750" y2="32" class="dataLine"/>
+  <text x="756" y="36" class="lblData">data back</text>
+  <line x1="826" y1="32" x2="860" y2="32" class="impl"/>
+  <text x="866" y="36" class="lblImpl">implements</text>
+  <rect x="946" y="24" width="14" height="14" rx="3" class="usecase"/>
+  <text x="966" y="36" class="lbl">business rule</text>
+  <rect x="1060" y="24" width="14" height="14" rx="3" class="iface"/>
+  <text x="1080" y="36" class="lbl">interface</text>
+
+  <!-- ================= PRESENTATION ================= -->
+  <rect x="20" y="56" width="1160" height="266" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="34" y="77" class="layer">PRESENTATION</text>
+
+  <rect x="36" y="86" width="612" height="226" rx="10" class="group" stroke="#2563eb"/>
+  <text x="52" y="106" class="groupLabel" fill="#2563eb">AAOS app · automotive · Compose</text>
+  <rect x="668" y="86" width="496" height="226" rx="10" class="group" stroke="#0d9488"/>
+  <text x="684" y="106" class="groupLabel" fill="#0d9488">ANDROID AUTO · shared · Car App Library</text>
+
+  <!-- AAOS: screens -->
+  <rect x="52" y="118" width="280" height="56" rx="10" class="ui"/>
+  <text x="192" y="142" text-anchor="middle" class="title">DataSourceDialog</text>
+  <text x="192" y="161" text-anchor="middle" class="sub">Overpass | Google Places</text>
+
+  <rect x="352" y="118" width="280" height="56" rx="10" class="ui"/>
+  <text x="492" y="142" text-anchor="middle" class="title">NearbyMapScreen</text>
+  <text x="492" y="161" text-anchor="middle" class="sub">list panel + MapLibre map</text>
+
+  <!-- AAOS: ViewModels -->
+  <rect x="52" y="232" width="280" height="64" rx="10" class="state"/>
+  <text x="192" y="255" text-anchor="middle" class="title">SettingsViewModel</text>
+  <text x="192" y="275" text-anchor="middle" class="sub">selected + available sources</text>
+
+  <rect x="352" y="232" width="280" height="64" rx="10" class="state"/>
+  <text x="492" y="255" text-anchor="middle" class="title">NearbyMapViewModel</text>
+  <text x="492" y="273" text-anchor="middle" class="sub">combine(category, source, retry)</text>
+  <text x="492" y="288" text-anchor="middle" class="sub">→ flatMapLatest → stateIn</text>
+
+  <!-- Android Auto -->
+  <rect x="684" y="118" width="464" height="56" rx="10" class="ui"/>
+  <text x="916" y="142" text-anchor="middle" class="title">NearbyPlacesScreen</text>
+  <text x="916" y="161" text-anchor="middle" class="sub">PlaceListMapTemplate (host draws the map)</text>
+
+  <rect x="684" y="232" width="464" height="64" rx="10" class="state"/>
+  <text x="916" y="255" text-anchor="middle" class="title">NearbyPlacesStateHolder</text>
+  <text x="916" y="273" text-anchor="middle" class="sub">presenter: car Screens have no ViewModel</text>
+  <text x="916" y="288" text-anchor="middle" class="sub">retry → flatMapLatest → stateIn</text>
+
+  <!-- screens ↔ state holders -->
+  <path d="M150,174 L150,230" class="call"/>
+  <text x="80" y="206" class="lbl">events</text>
+  <path d="M234,230 L234,176" class="dataLine"/>
+  <text x="242" y="206" class="lblData">uiState</text>
+  <path d="M450,174 L450,230" class="call"/>
+  <text x="380" y="206" class="lbl">events</text>
+  <path d="M534,230 L534,176" class="dataLine"/>
+  <text x="542" y="206" class="lblData">uiState</text>
+  <path d="M860,174 L860,230" class="call"/>
+  <text x="808" y="206" class="lbl">retry</text>
+  <path d="M972,230 L972,176" class="dataLine"/>
+  <text x="980" y="206" class="lblData">StateFlow</text>
+
+  <g transform="translate(0,28)">
+  <!-- ================= DOMAIN ================= -->
+  <rect x="20" y="304" width="1160" height="248" rx="12" fill="#fdf4ff" stroke="#f5d0fe"/>
+
+  <rect x="40" y="368" width="340" height="60" rx="10" class="usecase"/>
+  <text x="210" y="391" text-anchor="middle" class="title">SetPoiDataSourceUseCase</text>
+  <text x="210" y="411" text-anchor="middle" class="sub">only available sources</text>
+
+  <rect x="410" y="368" width="380" height="60" rx="10" class="usecase"/>
+  <text x="600" y="391" text-anchor="middle" class="title">ObservePoiDataSourceUseCase</text>
+  <text x="600" y="411" text-anchor="middle" class="sub">saved if available, else Google, else OSM</text>
+
+  <rect x="820" y="368" width="340" height="60" rx="10" class="usecase"/>
+  <text x="990" y="391" text-anchor="middle" class="title">GetNearbyPoisUseCase</text>
+  <text x="990" y="411" text-anchor="middle" class="sub">adds distance · nearest first</text>
+
+  <path d="M820,398 L792,398" class="call"/>
+  <text x="794" y="390" class="lbl">uses</text>
+
+  <rect x="40" y="474" width="520" height="58" rx="10" class="iface"/>
+  <text x="300" y="497" text-anchor="middle" class="title">SettingsRepository</text>
+  <text x="300" y="517" text-anchor="middle" class="sub">savedPoiDataSource: Flow · available · set()</text>
+
+  <rect x="640" y="474" width="520" height="58" rx="10" class="iface"/>
+  <text x="900" y="497" text-anchor="middle" class="title">PoiRepository</text>
+  <text x="900" y="517" text-anchor="middle" class="sub">getNearbyPois(source, center, radius, categories)</text>
+
+  <path d="M210,428 L210,472" class="call"/>
+  <path d="M480,428 L480,472" class="call"/>
+  <path d="M990,428 L990,472" class="call"/>
+
+  <!-- ================= DATA ================= -->
+  <rect x="20" y="562" width="1160" height="282" rx="12" fill="#f0f9ff" stroke="#bae6fd"/>
+  <text x="34" y="583" class="layer">DATA · core:data</text>
+
+  <rect x="40" y="602" width="340" height="56" rx="10" class="data"/>
+  <text x="210" y="625" text-anchor="middle" class="title">DataStoreSettingsRepository</text>
+  <text x="210" y="644" text-anchor="middle" class="sub">storage only · stored by name</text>
+
+  <rect x="40" y="700" width="340" height="52" rx="10" class="store"/>
+  <text x="210" y="722" text-anchor="middle" class="title">Preferences DataStore</text>
+  <text x="210" y="741" text-anchor="middle" class="sub">file "settings"</text>
+
+  <rect x="420" y="602" width="740" height="56" rx="10" class="data"/>
+  <text x="790" y="625" text-anchor="middle" class="title">PoiRepositoryImpl</text>
+  <text x="790" y="644" text-anchor="middle" class="sub">routes by source to a PoiRemoteDataSource · errors → Result</text>
+
+  <rect x="420" y="712" width="340" height="64" rx="10" class="data"/>
+  <text x="590" y="735" text-anchor="middle" class="title">OverpassPoiDataSource</text>
+  <text x="590" y="753" text-anchor="middle" class="sub">Overpass QL · server-side filters</text>
+  <text x="590" y="768" text-anchor="middle" class="sub">remark → error</text>
+
+  <rect x="820" y="712" width="340" height="64" rx="10" class="data"/>
+  <text x="990" y="735" text-anchor="middle" class="title">GooglePlacesPoiDataSource</text>
+  <text x="990" y="753" text-anchor="middle" class="sub">Nearby Search (New) · Pro fields</text>
+  <text x="990" y="768" text-anchor="middle" class="sub">key + Android app headers</text>
+
+  <text x="790" y="806" text-anchor="middle" class="lbl">both map to the same domain Poi</text>
+
+  <path d="M210,602 L210,534" class="impl"/>
+  <text x="218" y="572" class="lblImpl">implements</text>
+  <path d="M990,602 L990,534" class="impl"/>
+  <text x="998" y="572" class="lblImpl">implements</text>
+  <path d="M210,658 L210,698" class="call"/>
+  <path d="M500,658 L500,710" class="call"/>
+  <text x="508" y="690" class="lbl">OVERPASS</text>
+  <path d="M1080,658 L1080,710" class="call"/>
+  <text x="986" y="690" class="lbl">GOOGLE_PLACES</text>
+
+  <!-- ================= EXTERNAL ================= -->
+  <rect x="20" y="854" width="1160" height="132" rx="12" fill="#fff7ed" stroke="#fed7aa"/>
+  <text x="34" y="875" class="layer">EXTERNAL SERVICES</text>
+
+  <rect x="40" y="894" width="340" height="60" rx="30" class="ext"/>
+  <text x="210" y="918" text-anchor="middle" class="title">tiles.openfreemap.org</text>
+  <text x="210" y="938" text-anchor="middle" class="sub">AAOS map tiles · no key</text>
+
+  <rect x="420" y="894" width="340" height="60" rx="30" class="ext"/>
+  <text x="590" y="918" text-anchor="middle" class="title">overpass-api.de</text>
+  <text x="590" y="938" text-anchor="middle" class="sub">OpenStreetMap · free · no key</text>
+
+  <rect x="820" y="894" width="340" height="60" rx="30" class="ext"/>
+  <text x="990" y="918" text-anchor="middle" class="title">places.googleapis.com</text>
+  <text x="990" y="938" text-anchor="middle" class="sub">Google Places · API key</text>
+
+  <path d="M560,776 L560,892" class="call"/>
+  <path d="M620,892 L620,778" class="dataLine"/>
+  <text x="628" y="840" class="lblData">JSON</text>
+  <path d="M960,776 L960,892" class="call"/>
+  <path d="M1020,892 L1020,778" class="dataLine"/>
+  <text x="1028" y="840" class="lblData">JSON</text>
+
+  <text x="210" y="975" text-anchor="middle" class="lbl">drawn by MapLibre in NearbyMapScreen</text>
+  </g>
+
+  <!-- presentation → domain (drawn last, on top of the layer bands) -->
+  <path d="M150,296 L150,394" class="call"/>
+  <text x="158" y="384" class="lbl">set</text>
+  <path d="M300,296 L450,394" class="call"/>
+  <text x="338" y="384" class="lbl">observe</text>
+  <path d="M420,296 L540,394" class="call"/>
+  <text x="532" y="384" class="lbl">observe source</text>
+  <path d="M610,296 L860,394" class="call"/>
+  <text x="760" y="350" class="lbl">search</text>
+  <path d="M1010,296 L1010,394" class="call"/>
+  <text x="1002" y="360" text-anchor="end" class="lbl">search</text>
+  <path d="M1100,394 L1100,298" class="dataLine"/>
+  <text x="1108" y="360" class="lblData">Result</text>
+
+  <!-- Domain title on top of the arrows, on a patch of the band colour -->
+  <rect x="30" y="338" width="270" height="20" fill="#fdf4ff"/>
+  <text x="34" y="353" class="layer">DOMAIN · core:domain · pure Kotlin</text>
+</svg>
