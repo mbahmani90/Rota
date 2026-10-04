@@ -9,6 +9,7 @@ import com.majidbahmani.rota.core.domain.usecase.ObservePoiDataSourceUseCase
 import com.majidbahmani.rota.viewmodel.NearbyMapUiState.ErrorReason
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import java.io.IOException
 import javax.inject.Inject
 
@@ -33,8 +35,18 @@ class NearbyMapViewModel @Inject constructor(
     private val selectedCategory = MutableStateFlow(PoiCategory.EV_CHARGER)
     private val retryTrigger = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
+    /** Screen-only state (no search input); kept here instead of in Compose `remember`. */
+    private data class ScreenState(
+        val selectedPlaceId: String? = null,
+        val panelExpanded: Boolean = true,
+        val mapLayoutVersion: Int = 0,
+        val showDataSourceDialog: Boolean = false,
+    )
+
+    private val screenState = MutableStateFlow(ScreenState())
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<NearbyMapUiState> = combine(
+    private val searchState: Flow<NearbyMapUiState> = combine(
         selectedCategory,
         // A different source in the settings searches again.
         observePoiDataSource(),
@@ -53,6 +65,17 @@ class NearbyMapViewModel @Inject constructor(
                 )
             }
         }
+
+    // Screen state is combined after the search, so it never starts a new search.
+    val uiState: StateFlow<NearbyMapUiState> = combine(searchState, screenState) { search, screen ->
+        search.copy(
+            // A selection only counts while its place is in the current results.
+            selectedPlaceId = screen.selectedPlaceId?.takeIf { id -> search.places.any { it.poi.id == id } },
+            panelExpanded = screen.panelExpanded,
+            mapLayoutVersion = screen.mapLayoutVersion,
+            showDataSourceDialog = screen.showDataSourceDialog,
+        )
+    }
         .stateIn(
             viewModelScope,
             SharingStarted.Lazily,
@@ -60,11 +83,35 @@ class NearbyMapViewModel @Inject constructor(
         )
 
     fun onCategorySelected(category: PoiCategory) {
+        screenState.update { it.copy(selectedPlaceId = null) }
         selectedCategory.value = category
     }
 
     fun retry() {
+        screenState.update { it.copy(selectedPlaceId = null) }
         retryTrigger.tryEmit(Unit)
+    }
+
+    /** From the list or the map; the other one follows. */
+    fun onPlaceSelected(placeId: String) {
+        screenState.update { it.copy(selectedPlaceId = placeId) }
+    }
+
+    fun onTogglePanel() {
+        screenState.update { it.copy(panelExpanded = !it.panelExpanded) }
+    }
+
+    /** Called when the panel animation ends: the map now has its new size. */
+    fun onPanelAnimationFinished() {
+        screenState.update { it.copy(mapLayoutVersion = it.mapLayoutVersion + 1) }
+    }
+
+    fun onChangeDataSource() {
+        screenState.update { it.copy(showDataSourceDialog = true) }
+    }
+
+    fun onDataSourceDialogDismissed() {
+        screenState.update { it.copy(showDataSourceDialog = false) }
     }
 
     // Timeouts and a missing network are IOExceptions; anything else is a server-side problem.

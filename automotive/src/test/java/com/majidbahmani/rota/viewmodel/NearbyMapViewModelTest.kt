@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -153,5 +154,99 @@ class NearbyMapViewModelTest {
         assertEquals(PoiDataSource.GOOGLE_PLACES, repository.requests.last().source)
         assertEquals(PoiDataSource.GOOGLE_PLACES, viewModel.uiState.value.dataSource)
         assertTrue(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `panel starts open and toggles`() = runTest {
+        val viewModel = collectedViewModel()
+        assertTrue(viewModel.uiState.value.panelExpanded)
+
+        viewModel.onTogglePanel()
+        runCurrent()
+        assertEquals(false, viewModel.uiState.value.panelExpanded)
+
+        viewModel.onTogglePanel()
+        runCurrent()
+        assertTrue(viewModel.uiState.value.panelExpanded)
+    }
+
+    @Test
+    fun `folding the panel doesn't search again and keeps the places`() = runTest {
+        val viewModel = collectedViewModel()
+        repository.answer(0, Result.success(listOf(place("near", 38.73))))
+        runCurrent()
+
+        viewModel.onTogglePanel()
+        viewModel.onPanelAnimationFinished()
+        runCurrent()
+
+        assertEquals(1, repository.requests.size)
+        assertEquals(listOf("near"), viewModel.uiState.value.places.map { it.poi.id })
+    }
+
+    @Test
+    fun `finished panel animation increases the map layout version`() = runTest {
+        val viewModel = collectedViewModel()
+        val before = viewModel.uiState.value.mapLayoutVersion
+
+        viewModel.onPanelAnimationFinished()
+        runCurrent()
+
+        assertEquals(before + 1, viewModel.uiState.value.mapLayoutVersion)
+    }
+
+    @Test
+    fun `panel stays folded when the category changes`() = runTest {
+        val viewModel = collectedViewModel()
+        viewModel.onTogglePanel()
+        runCurrent()
+
+        viewModel.onCategorySelected(PoiCategory.FUEL)
+        runCurrent()
+
+        assertEquals(false, viewModel.uiState.value.panelExpanded)
+        assertEquals(PoiCategory.FUEL, viewModel.uiState.value.category)
+    }
+
+    @Test
+    fun `selecting a place from the list or map shows it as selected`() = runTest {
+        val viewModel = collectedViewModel()
+        repository.answer(0, Result.success(listOf(place("a", 38.73), place("b", 38.74))))
+        runCurrent()
+
+        viewModel.onPlaceSelected("b")
+        runCurrent()
+
+        assertEquals("b", viewModel.uiState.value.selectedPlaceId)
+    }
+
+    @Test
+    fun `selection is cleared by a new category and ignored when not in the results`() = runTest {
+        val viewModel = collectedViewModel()
+        repository.answer(0, Result.success(listOf(place("a", 38.73))))
+        runCurrent()
+        viewModel.onPlaceSelected("unknown")
+        runCurrent()
+        assertNull(viewModel.uiState.value.selectedPlaceId)
+
+        viewModel.onPlaceSelected("a")
+        viewModel.onCategorySelected(PoiCategory.FUEL)
+        runCurrent()
+
+        assertNull(viewModel.uiState.value.selectedPlaceId)
+    }
+
+    @Test
+    fun `data source dialog opens and closes without searching`() = runTest {
+        val viewModel = collectedViewModel()
+
+        viewModel.onChangeDataSource()
+        runCurrent()
+        assertTrue(viewModel.uiState.value.showDataSourceDialog)
+
+        viewModel.onDataSourceDialogDismissed()
+        runCurrent()
+        assertEquals(false, viewModel.uiState.value.showDataSourceDialog)
+        assertEquals(1, repository.requests.size)
     }
 }
