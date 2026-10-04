@@ -1,4 +1,4 @@
-package com.majidbahmani.rota.core.data.remote.dto
+package com.majidbahmani.rota.core.data.remote.overpass.dto
 
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals

@@ -1,8 +1,8 @@
 package com.majidbahmani.rota.core.data.repository
 
 import com.majidbahmani.rota.core.data.mapper.toDomain
-import com.majidbahmani.rota.core.data.remote.OverpassApi
-import com.majidbahmani.rota.core.data.remote.OverpassServerException
+import com.majidbahmani.rota.core.data.remote.overpass.OverpassApi
+import com.majidbahmani.rota.core.data.remote.overpass.OverpassServerException
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory

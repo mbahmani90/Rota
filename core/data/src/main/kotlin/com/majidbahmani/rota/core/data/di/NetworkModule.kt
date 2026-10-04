@@ -1,7 +1,7 @@
 package com.majidbahmani.rota.core.data.di
 
 import com.majidbahmani.rota.core.data.BuildConfig
-import com.majidbahmani.rota.core.data.remote.OverpassApi
+import com.majidbahmani.rota.core.data.remote.overpass.OverpassApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

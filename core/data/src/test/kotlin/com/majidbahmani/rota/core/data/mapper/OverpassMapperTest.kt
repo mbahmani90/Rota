@@ -1,8 +1,8 @@
 package com.majidbahmani.rota.core.data.mapper
 
-import com.majidbahmani.rota.core.data.remote.dto.OverpassCenterDto
-import com.majidbahmani.rota.core.data.remote.dto.OverpassElementDto
-import com.majidbahmani.rota.core.data.remote.dto.OverpassResponseDto
+import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassCenterDto
+import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassElementDto
+import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassResponseDto
 import com.majidbahmani.rota.core.domain.model.ChargingConnector
 import com.majidbahmani.rota.core.domain.model.ConnectorType
 import com.majidbahmani.rota.core.domain.model.FuelType

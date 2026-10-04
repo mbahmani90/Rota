@@ -1,9 +1,9 @@
 package com.majidbahmani.rota.core.data.repository
 
 import com.majidbahmani.rota.core.data.fake.FakeOverpassApi
-import com.majidbahmani.rota.core.data.remote.OverpassServerException
-import com.majidbahmani.rota.core.data.remote.dto.OverpassElementDto
-import com.majidbahmani.rota.core.data.remote.dto.OverpassResponseDto
+import com.majidbahmani.rota.core.data.remote.overpass.OverpassServerException
+import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassElementDto
+import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassResponseDto
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import kotlinx.coroutines.CancellationException

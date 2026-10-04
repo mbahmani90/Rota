@@ -1,0 +1,34 @@
+{
+  "places": [
+    {
+      "id": "test-charger-1",
+      "displayName": { "text": "Powerdot Charging Station", "languageCode": "pt" },
+      "formattedAddress": "Av. Gen. Roçadas, 1170-166 Lisboa, Portugal",
+      "location": { "latitude": 38.7222735, "longitude": -9.1288602 },
+      "primaryType": "electric_vehicle_charging_station",
+      "types": ["electric_vehicle_charging_station", "point_of_interest", "establishment"]
+    },
+    {
+      "id": "test-fuel-1",
+      "displayName": { "text": "Galp", "languageCode": "pt" },
+      "formattedAddress": "R. da Graça 1, 1170-169 Lisboa, Portugal",
+      "location": { "latitude": 38.721171, "longitude": -9.1301245 },
+      "primaryType": "convenience_store",
+      "types": ["convenience_store", "gas_station", "store", "point_of_interest", "establishment"],
+      "rating": 4.1
+    },
+    {
+      "id": "test-parking-1",
+      "displayName": { "text": "Parque Saldanha", "languageCode": "pt" },
+      "location": { "latitude": 38.7324001, "longitude": -9.1468752 },
+      "types": ["parking", "point_of_interest", "establishment"]
+    },
+    {
+      "id": "test-cafe-1",
+      "displayName": { "text": "Café", "languageCode": "pt" },
+      "location": { "latitude": 38.72, "longitude": -9.13 },
+      "primaryType": "cafe",
+      "types": ["cafe", "food", "point_of_interest", "establishment"]
+    }
+  ]
+}
