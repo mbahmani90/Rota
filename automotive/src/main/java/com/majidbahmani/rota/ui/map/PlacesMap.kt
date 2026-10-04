@@ -82,7 +82,7 @@ class PlacesMapController {
         showAll()
     }
 
-    /** Highlight the place and zoom to it; null clears the highlight. */
+    /** Highlight the place without changing the zoom; null clears the highlight. */
     internal fun select(placeId: String?) {
         selectedPlaceId = placeId
         applySelection()
@@ -111,9 +111,17 @@ class PlacesMapController {
         map?.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsOf(center, places), BOUNDS_PADDING_PX))
     }
 
+    /**
+     * Keeps the selected place on screen without zooming: the camera only pans when the place is
+     * outside the visible area (e.g. selected from the list). Returns false when nothing is selected.
+     */
     private fun focusSelected(): Boolean {
         val place = places.firstOrNull { it.poi.id == selectedPlaceId } ?: return false
-        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(place.poi.location.toLatLng(), PLACE_ZOOM))
+        val map = map ?: return true
+        val position = place.poi.location.toLatLng()
+        if (!map.projection.visibleRegion.latLngBounds.contains(position)) {
+            map.animateCamera(CameraUpdateFactory.newLatLng(position))
+        }
         return true
     }
 }
@@ -268,5 +276,4 @@ private const val PROPERTY_ID = "id"
 private const val PROPERTY_NAME = "name"
 
 private const val DEFAULT_ZOOM = 14.0
-private const val PLACE_ZOOM = 16.0
 private const val BOUNDS_PADDING_PX = 120
