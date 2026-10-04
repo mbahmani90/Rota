@@ -23,6 +23,8 @@ dependencies {
 
     implementation libs.androidx.app
     implementation libs.kotlinx.coroutines.core
+    // lifecycleScope / repeatOnLifecycle for car Screens
+    implementation libs.androidx.lifecycle.runtime.ktx
 
     // Hilt
     implementation libs.hilt.android
