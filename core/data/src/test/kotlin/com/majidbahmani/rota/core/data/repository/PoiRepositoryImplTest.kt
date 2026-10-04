@@ -1,115 +1,100 @@
 package com.majidbahmani.rota.core.data.repository
 
-import com.majidbahmani.rota.core.data.fake.FakeOverpassApi
-import com.majidbahmani.rota.core.data.remote.overpass.OverpassServerException
-import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassElementDto
-import com.majidbahmani.rota.core.data.remote.overpass.dto.OverpassResponseDto
+import com.majidbahmani.rota.core.data.fake.FakePoiRemoteDataSource
+import com.majidbahmani.rota.core.data.remote.google.GooglePlacesConfig
 import com.majidbahmani.rota.core.domain.model.GeoPoint
+import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
+import com.majidbahmani.rota.core.domain.model.PoiDetails
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.SerializationException
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.IOException
 
 class PoiRepositoryImplTest {
 
-    private val api = FakeOverpassApi()
-    private val repository = PoiRepositoryImpl(api)
+    private val overpass = FakePoiRemoteDataSource(pois = listOf(poi("osm")))
+    private val google = FakePoiRemoteDataSource(pois = listOf(poi("google")))
     private val lisbon = GeoPoint(38.7223, -9.1393)
 
-    private suspend fun search(
+    private fun repository(apiKey: String = "") =
+        PoiRepositoryImpl(overpass, google, GooglePlacesConfig(apiKey))
+
+    private suspend fun PoiRepositoryImpl.search(
         categories: Set<PoiCategory> = setOf(PoiCategory.FUEL),
-        center: GeoPoint = lisbon,
-        radiusMeters: Int = 1000,
-    ) = repository.getNearbyPois(center, radiusMeters, categories)
+        radiusMeters: Int = 1_000,
+    ) = getNearbyPois(lisbon, radiusMeters, categories)
+
+    private fun poi(id: String) = Poi(
+        id = id,
+        name = null,
+        location = GeoPoint(38.72, -9.13),
+        address = null,
+        operator = null,
+        openingHours = null,
+        hasFee = null,
+        details = PoiDetails.Fuel(emptySet()),
+    )
 
     @Test
-    fun `success maps elements to domain`() = runTest {
-        api.response = OverpassResponseDto(
-            elements = listOf(
-                OverpassElementDto(type = "node", id = 1, lat = 1.0, lon = 2.0, tags = mapOf("amenity" to "fuel")),
-                OverpassElementDto(type = "node", id = 2, lat = 1.0, lon = 2.0, tags = mapOf("amenity" to "cafe")),
-            )
-        )
+    fun `without a key, overpass is used`() = runTest {
+        val pois = repository(apiKey = "").search().getOrThrow()
 
-        val pois = search().getOrThrow()
-
-        assertEquals(listOf("node/1"), pois.map { it.id })
-        assertEquals(1, api.queries.size)
+        assertEquals(listOf("osm"), pois.map { it.id })
+        assertEquals(0, google.calls)
     }
 
     @Test
-    fun `remark is reported as failure`() = runTest {
-        api.response = OverpassResponseDto(remark = "runtime error: Query timed out")
+    fun `with a key, google places is used`() = runTest {
+        val pois = repository(apiKey = "test-key").search().getOrThrow()
 
-        val error = search().exceptionOrNull()
-
-        assertTrue(error is OverpassServerException)
-        assertEquals("runtime error: Query timed out", error?.message)
+        assertEquals(listOf("google"), pois.map { it.id })
+        assertEquals(0, overpass.calls)
     }
 
     @Test
-    fun `network error is reported as failure`() = runTest {
-        api.error = IOException("offline")
+    fun `blank key counts as no key`() = runTest {
+        repository(apiKey = "  ").search()
 
-        assertTrue(search().exceptionOrNull() is IOException)
+        assertEquals(1, overpass.calls)
+    }
+
+    @Test
+    fun `empty categories return an empty list without a request`() = runTest {
+        val pois = repository().search(categories = emptySet()).getOrThrow()
+
+        assertEquals(emptyList<Poi>(), pois)
+        assertEquals(0, overpass.calls + google.calls)
+    }
+
+    @Test
+    fun `data source error becomes a failure`() = runTest {
+        val error = IOException("offline")
+        overpass.error = error
+
+        assertSame(error, repository().search().exceptionOrNull())
+    }
+
+    @Test
+    fun `malformed response becomes a failure, not a crash`() = runTest {
+        overpass.error = SerializationException("bad json")
+
+        assertTrue(repository().search().exceptionOrNull() is SerializationException)
     }
 
     @Test(expected = CancellationException::class)
     fun `cancellation is rethrown, not wrapped`() = runTest {
-        api.error = CancellationException("cancelled")
+        overpass.error = CancellationException("cancelled")
 
-        search()
-    }
-
-    @Test
-    fun `empty categories return empty list without a request`() = runTest {
-        val pois = search(categories = emptySet()).getOrThrow()
-
-        assertEquals(emptyList<Any>(), pois)
-        assertEquals(emptyList<String>(), api.queries)
-    }
-
-    @Test
-    fun `query for all categories`() = runTest {
-        search(categories = PoiCategory.entries.toSet(), radiusMeters = 1500)
-
-        assertEquals(
-            """
-            [out:json][timeout:25];
-            (
-              nwr["amenity"="charging_station"](around:1500,38.722300,-9.139300);
-              nwr["amenity"="fuel"](around:1500,38.722300,-9.139300);
-              nwr["amenity"="parking"]["parking"!~"^(street_side|lane|on_kerb|half_on_kerb|layby|garage_boxes|sheds)${'$'}"]["access"!~"^(private|no|permit)${'$'}"](around:1500,38.722300,-9.139300);
-            );
-            out center tags;
-            """.trimIndent(),
-            api.queries.single(),
-        )
-    }
-
-    @Test
-    fun `query contains only the requested categories`() = runTest {
-        search(categories = setOf(PoiCategory.FUEL))
-
-        val query = api.queries.single()
-        assertTrue(query.contains("""["amenity"="fuel"]"""))
-        assertFalse(query.contains("charging_station"))
-        assertFalse(query.contains("parking"))
-    }
-
-    @Test
-    fun `coordinates near zero are not in scientific notation`() = runTest {
-        search(center = GeoPoint(0.00001, -0.00001), radiusMeters = 100)
-
-        assertTrue(api.queries.single().contains("(around:100,0.000010,-0.000010)"))
+        repository().search()
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun `radius must be positive`() = runTest {
-        search(radiusMeters = 0)
+        repository().search(radiusMeters = 0)
     }
 }
