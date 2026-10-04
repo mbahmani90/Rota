@@ -1,10 +1,16 @@
 package com.majidbahmani.rota.core.data.di
 
+import android.content.Context
 import com.majidbahmani.rota.core.data.BuildConfig
+import com.majidbahmani.rota.core.data.remote.google.GooglePlacesApi
+import com.majidbahmani.rota.core.data.remote.google.GooglePlacesConfig
+import com.majidbahmani.rota.core.data.remote.google.GooglePlacesHeadersInterceptor
+import com.majidbahmani.rota.core.data.remote.google.signingCertificateSha1
 import com.majidbahmani.rota.core.data.remote.overpass.OverpassApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -56,7 +62,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(json: Json, client: OkHttpClient): Retrofit = Retrofit.Builder()
+    @OverpassRetrofit
+    fun provideOverpassRetrofit(json: Json, client: OkHttpClient): Retrofit = Retrofit.Builder()
         .baseUrl(OverpassApi.BASE_URL)
         .client(client)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
@@ -64,6 +71,42 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOverpassApi(retrofit: Retrofit): OverpassApi =
+    fun provideOverpassApi(@OverpassRetrofit retrofit: Retrofit): OverpassApi =
         retrofit.create(OverpassApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGooglePlacesConfig(): GooglePlacesConfig = GooglePlacesConfig(BuildConfig.MAPS_API_KEY)
+
+    @Provides
+    @Singleton
+    @GooglePlacesRetrofit
+    fun provideGooglePlacesRetrofit(
+        json: Json,
+        client: OkHttpClient,
+        config: GooglePlacesConfig,
+        @ApplicationContext context: Context,
+    ): Retrofit {
+        // Derived from the shared client, so the connection pool is shared (doc 06). Added after
+        // the logging interceptor, so the key never appears in the log.
+        val googleClient = client.newBuilder()
+            .addInterceptor(
+                GooglePlacesHeadersInterceptor(
+                    apiKey = config.apiKey,
+                    packageName = context.packageName,
+                    certificateSha1 = { context.signingCertificateSha1() },
+                )
+            )
+            .build()
+        return Retrofit.Builder()
+            .baseUrl(GooglePlacesApi.BASE_URL)
+            .client(googleClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGooglePlacesApi(@GooglePlacesRetrofit retrofit: Retrofit): GooglePlacesApi =
+        retrofit.create(GooglePlacesApi::class.java)
 }

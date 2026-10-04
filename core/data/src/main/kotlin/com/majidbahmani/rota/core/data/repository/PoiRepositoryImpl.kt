@@ -1,18 +1,24 @@
 package com.majidbahmani.rota.core.data.repository
 
-import com.majidbahmani.rota.core.data.mapper.toDomain
-import com.majidbahmani.rota.core.data.remote.overpass.OverpassApi
-import com.majidbahmani.rota.core.data.remote.overpass.OverpassServerException
+import com.majidbahmani.rota.core.data.datasource.PoiRemoteDataSource
+import com.majidbahmani.rota.core.data.di.GooglePlacesSource
+import com.majidbahmani.rota.core.data.di.OverpassSource
+import com.majidbahmani.rota.core.data.remote.google.GooglePlacesConfig
 import com.majidbahmani.rota.core.domain.model.GeoPoint
 import com.majidbahmani.rota.core.domain.model.Poi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
 import com.majidbahmani.rota.core.domain.repository.PoiRepository
-import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
+/**
+ * Coordinates the POI data sources: Google Places when an API key is set, Overpass otherwise.
+ * The only place where data-source errors become a Result.
+ */
 class PoiRepositoryImpl @Inject constructor(
-    private val api: OverpassApi,
+    @param:OverpassSource private val overpass: PoiRemoteDataSource,
+    @param:GooglePlacesSource private val googlePlaces: PoiRemoteDataSource,
+    private val googlePlacesConfig: GooglePlacesConfig,
 ) : PoiRepository {
 
     override suspend fun getNearbyPois(
@@ -20,13 +26,11 @@ class PoiRepositoryImpl @Inject constructor(
         radiusMeters: Int,
         categories: Set<PoiCategory>,
     ): Result<List<Poi>> {
+        // Invalid input is a programming error, so it throws instead of becoming a failure.
+        require(radiusMeters > 0) { "radiusMeters must be positive, was $radiusMeters" }
         if (categories.isEmpty()) return Result.success(emptyList())
-        val query = buildQuery(center, radiusMeters, categories)
         return try {
-            val response = api.interpreter(query)
-            // Overpass can answer 200 with the error only in `remark`.
-            response.remark?.let { throw OverpassServerException(it) }
-            Result.success(response.toDomain())
+            Result.success(selectedSource().getNearbyPois(center, radiusMeters, categories))
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -34,30 +38,6 @@ class PoiRepositoryImpl @Inject constructor(
         }
     }
 
-    /** Overpass QL; filtering happens on the server to keep responses small. */
-    private fun buildQuery(center: GeoPoint, radiusMeters: Int, categories: Set<PoiCategory>): String {
-        require(radiusMeters > 0) { "radiusMeters must be positive, was $radiusMeters" }
-        // Locale.ROOT: always a dot as decimal separator; fixed digits: no scientific notation.
-        val around = String.format(
-            Locale.ROOT,
-            "(around:%d,%.6f,%.6f)",
-            radiusMeters,
-            center.latitude,
-            center.longitude,
-        )
-        val statements = PoiCategory.entries
-            .filter { it in categories }
-            .joinToString("\n") { "  nwr${it.tagFilter()}$around;" }
-        return "[out:json][timeout:${OverpassApi.QUERY_TIMEOUT_SECONDS}];\n(\n$statements\n);\nout center tags;"
-    }
-
-    private fun PoiCategory.tagFilter(): String = when (this) {
-        PoiCategory.EV_CHARGER -> """["amenity"="charging_station"]"""
-        PoiCategory.FUEL -> """["amenity"="fuel"]"""
-        // Skip on-street spaces, private garages and private or residents-only parking.
-        // `!~` also keeps elements that don't have the tag.
-        PoiCategory.PARKING -> """["amenity"="parking"]""" +
-            """["parking"!~"^(street_side|lane|on_kerb|half_on_kerb|layby|garage_boxes|sheds)$"]""" +
-            """["access"!~"^(private|no|permit)$"]"""
-    }
+    private fun selectedSource(): PoiRemoteDataSource =
+        if (googlePlacesConfig.isAvailable) googlePlaces else overpass
 }
