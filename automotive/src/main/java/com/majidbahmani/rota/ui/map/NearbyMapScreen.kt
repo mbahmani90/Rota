@@ -23,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +43,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.majidbahmani.rota.R
 import com.majidbahmani.rota.core.domain.model.NearbyPoi
 import com.majidbahmani.rota.core.domain.model.PoiCategory
+import com.majidbahmani.rota.ui.settings.DataSourceDialogRoute
+import com.majidbahmani.rota.ui.settings.title
 import com.majidbahmani.rota.viewmodel.NearbyMapUiState
 import com.majidbahmani.rota.viewmodel.NearbyMapUiState.ErrorReason
 import com.majidbahmani.rota.viewmodel.NearbyMapViewModel
@@ -52,13 +55,18 @@ fun NearbyMapRoute(
     viewModel: NearbyMapViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showDataSourceDialog by remember { mutableStateOf(false) }
 
     NearbyMapScreen(
         uiState = uiState,
         onCategorySelected = viewModel::onCategorySelected,
         onRetry = viewModel::retry,
+        onChangeDataSource = { showDataSourceDialog = true },
         modifier = modifier,
     )
+    if (showDataSourceDialog) {
+        DataSourceDialogRoute(onDismiss = { showDataSourceDialog = false })
+    }
 }
 
 @Composable
@@ -66,6 +74,7 @@ fun NearbyMapScreen(
     uiState: NearbyMapUiState,
     onCategorySelected: (PoiCategory) -> Unit,
     onRetry: () -> Unit,
+    onChangeDataSource: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val mapState = rememberPlacesMapState()
@@ -79,6 +88,7 @@ fun NearbyMapScreen(
             selectedPlaceId = selectedPlaceId,
             onCategorySelected = onCategorySelected,
             onRetry = onRetry,
+            onChangeDataSource = onChangeDataSource,
             onPlaceClick = { selectedPlaceId = it.poi.id },
             modifier = Modifier.width(PANEL_WIDTH).fillMaxHeight(),
         )
@@ -107,6 +117,7 @@ private fun PlacesPanel(
     selectedPlaceId: String?,
     onCategorySelected: (PoiCategory) -> Unit,
     onRetry: () -> Unit,
+    onChangeDataSource: () -> Unit,
     onPlaceClick: (NearbyPoi) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -124,6 +135,7 @@ private fun PlacesPanel(
                     )
                 }
             }
+            DataSourceRow(uiState, onChangeDataSource)
             HorizontalDivider()
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
@@ -136,6 +148,26 @@ private fun PlacesPanel(
                     else -> PlaceList(uiState.places, selectedPlaceId, onPlaceClick)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun DataSourceRow(uiState: NearbyMapUiState, onChangeDataSource: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = uiState.dataSource?.let { stringResource(R.string.data_source_in_use, it.title()) }.orEmpty(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        TextButton(onClick = onChangeDataSource) {
+            Text(stringResource(R.string.action_change))
         }
     }
 }

@@ -17,4 +17,15 @@
 
     <string name="distance_meters">%1$d m</string>
     <string name="distance_kilometers">%1$.1f km</string>
+
+    <!-- Settings -->
+    <string name="settings_data_source">Data source</string>
+    <string name="data_source_overpass">OpenStreetMap (Overpass)</string>
+    <string name="data_source_overpass_description">Free, no key; may be busy at times</string>
+    <string name="data_source_google_places">Google Places</string>
+    <string name="data_source_google_places_description">Faster and more names; uses your API key</string>
+    <string name="data_source_needs_key">Needs MAPS_API_KEY in local.properties</string>
+    <string name="data_source_in_use">Data: %1$s</string>
+    <string name="action_done">Done</string>
+    <string name="action_change">Change</string>
 </resources>
