@@ -191,11 +191,12 @@ The key goes `local.properties` → `BuildConfig` → an OkHttp interceptor that
 **CI pipeline** (GitHub Actions):
 
 ```
-[ Build ] ──┬──► [ Unit tests ]
-            ├──► [ Android Lint ]
-            └──► [ Code style ]
+[ Changes ] ──► [ Build ] ──┬──► [ Unit tests ]   ──┐
+                            ├──► [ Android Lint ] ──┼──► [ CI result ]
+                            └──► [ Code style ]   ──┘
 ```
 
+- **Changes**: if a PR (or push) only touches Markdown or `docs/`, everything after it is skipped (~30 s instead of ~5 min).
 - **Build**: debug APKs of both apps (downloadable from the run).
 - **Unit tests**, **Android Lint** and **Code style** run in parallel once the build is green; each uploads its reports.
 - **Code style**: ktlint (Android Studio style, 120 columns, Compose rules) through Spotless:
@@ -203,6 +204,7 @@ The key goes `local.properties` → `BuildConfig` → an OkHttp interceptor that
   ./gradlew spotlessCheck    # what CI runs
   ./gradlew spotlessApply    # fixes most violations
   ```
+- **CI result**: one summary check (fails if any job failed; skipped jobs count as passed), the check to require in branch protection.
 
 - **Fakes over mocks**: domain interfaces make hand-written fakes easy; repository fakes can suspend until the test answers, to test cancellation and ordering.
 - **Coroutines**: `runTest`, `runCurrent()`, a `MainDispatcherRule` for `viewModelScope`, collectors in `backgroundScope` for lazy `StateFlow`s.
