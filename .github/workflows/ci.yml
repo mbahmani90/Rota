@@ -14,11 +14,13 @@ concurrency:
 permissions:
   contents: read
 
+# Two jobs in a row: "Test and lint" starts only when "Build" succeeded.
+# Each job runs on its own fresh machine, so both check out and set up JDK and Gradle.
 jobs:
   build:
-    name: Build, test and lint
+    name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
 
     steps:
       - name: Check out
@@ -40,10 +42,41 @@ jobs:
       - name: Build debug APKs
         run: ./gradlew assembleDebug
 
+      - name: Upload debug APKs
+        uses: actions/upload-artifact@v7
+        with:
+          name: debug-apks
+          path: |
+            automotive/build/outputs/apk/debug/*.apk
+            mobile/build/outputs/apk/debug/*.apk
+          retention-days: 7
+
+  verify:
+    name: Test and lint
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+
+      # Reuses the Gradle cache, so less is compiled again than on a cold machine.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
       - name: Unit tests
         run: ./gradlew :core:domain:test testDebugUnitTest
 
+      # Runs even when tests failed, so both results are visible in one run.
       - name: Android Lint
+        if: ${{ !cancelled() }}
         run: ./gradlew lintDebug
 
       - name: Upload test and lint reports
@@ -55,13 +88,4 @@ jobs:
             **/build/reports/tests/
             **/build/test-results/
             **/build/reports/lint-results-*.html
-          retention-days: 7
-
-      - name: Upload debug APKs
-        uses: actions/upload-artifact@v7
-        with:
-          name: debug-apks
-          path: |
-            automotive/build/outputs/apk/debug/*.apk
-            mobile/build/outputs/apk/debug/*.apk
           retention-days: 7
