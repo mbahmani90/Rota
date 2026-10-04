@@ -1,5 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Required by PlaceListMapTemplate; without it the host rejects the template. -->
+    <uses-permission android:name="androidx.car.app.MAP_TEMPLATES" />
+
     <application>
         <!-- Minimum Car API level -->
         <meta-data
@@ -7,7 +10,7 @@
             android:value="1" />
 
         <service
-            android:name="com.majidbahmani.rota.shared.MyCarAppService"
+            android:name="com.majidbahmani.rota.shared.RotaCarAppService"
             android:exported="true">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />

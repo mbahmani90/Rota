@@ -1,0 +1,15 @@
+<resources>
+    <!-- Categories: screen titles and names for places without one -->
+    <string name="category_ev_charger">EV chargers</string>
+    <string name="category_fuel">Fuel stations</string>
+    <string name="category_parking">Parking</string>
+    <string name="category_ev_charger_single">EV charger</string>
+    <string name="category_fuel_single">Fuel station</string>
+    <string name="category_parking_single">Parking</string>
+
+    <!-- Nearby places -->
+    <string name="nearby_empty">Nothing found nearby</string>
+    <string name="error_no_connection">No connection</string>
+    <string name="error_service">Map service busy</string>
+    <string name="action_retry">Retry</string>
+</resources>
