@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">Rota</string>
+
+    <string name="category_ev_charger">EV chargers</string>
+    <string name="category_fuel">Fuel</string>
+    <string name="category_parking">Parking</string>
+    <string name="category_ev_charger_single">EV charger</string>
+    <string name="category_fuel_single">Fuel station</string>
+    <string name="category_parking_single">Parking</string>
+
+    <string name="nearby_empty">Nothing found nearby</string>
+    <string name="error_no_connection">No connection</string>
+    <string name="error_service">Map service busy</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_zoom_in">Zoom in</string>
+    <string name="action_zoom_out">Zoom out</string>
+
+    <string name="distance_meters">%1$d m</string>
+    <string name="distance_kilometers">%1$.1f km</string>
 </resources>
