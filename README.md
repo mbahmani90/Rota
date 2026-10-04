@@ -218,12 +218,18 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-It builds **signed release APKs** for AAOS and the phone (Android Auto), verifies their signatures and publishes a
-**GitHub Release** with `rota-automotive-<version>.apk`, `rota-mobile-<version>.apk`, SHA-256 checksums and notes generated
+```
+[ Build signed APKs ] ──► [ Publish GitHub Release ]
+  signing secrets, read-only    write access, no secrets
+```
+
+**Build signed APKs** builds release APKs for AAOS and the phone (Android Auto) and verifies their signatures;
+**Publish GitHub Release** creates a **GitHub Release** with `rota-automotive-<version>.apk`, `rota-mobile-<version>.apk`, SHA-256 checksums and notes generated
 from the merged pull requests. Version from the tag: `v1.2.3` → versionName `1.2.3`, versionCode `10203`.
 
 The signing keystore and its passwords are **encrypted repository secrets** (`ROTA_KEYSTORE_BASE64`,
-`ROTA_KEYSTORE_PASSWORD`, `ROTA_KEY_ALIAS`, `ROTA_KEY_PASSWORD`); Gradle reads them only from environment variables, so
+`ROTA_KEYSTORE_PASSWORD`, `ROTA_KEY_PASSWORD`; the key alias `rota` isn't secret and is set in the workflow); only the
+build job receives them. Gradle reads them only from environment variables, so
 local release builds are unsigned and nothing secret is in the repository. Releases don't contain a Google API key
 (Overpass is used).
 
